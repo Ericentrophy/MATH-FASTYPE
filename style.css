@@ -139,4 +139,11 @@ h3{font-family:Bungee,Impact,"Arial Black",sans-serif;font-weight:400;font-size:
   .gamegrid .pad{margin:0}
   .q{margin-top:0}
 }
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}.focus{border:2px solid var(--ink);border-radius:10px;padding:6px 12px;min-height:38px;font-weight:800;font-size:.85rem}
+.focus[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.coach{margin-top:16px;border:3px solid var(--ink);border-radius:12px;padding:10px 14px}
+.coachhd{font-family:Bungee,Impact,"Arial Black",sans-serif;font-size:.95rem}
+.coachhd small{font-family:Nunito,system-ui,sans-serif;font-size:.7rem;color:var(--mid);font-weight:600}
+.coach p{margin:6px 0 10px;min-height:2.8em;line-height:1.45}
+.coachbtns{display:flex;gap:10px;flex-wrap:wrap}
+.coach.bad{border-color:var(--bad)}.coach.good{border-color:var(--good)}

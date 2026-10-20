@@ -25,7 +25,7 @@
         <li>Choose a challenge below.</li>
         <li>Pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
         <li>Type each answer. It checks itself, so you don’t need to press Enter.</li>
-        <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer.</li>
+        <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer, lets you choose 12, 30, 50 or unlimited questions, and a coach gives hints and explains mistakes.</li>
         <li>After every round you see which answers were right or wrong, and why.</li>
       </ol>
     </details>
@@ -69,9 +69,11 @@
       <div class="in">
         <div class="now">Ready: <b id="playName"></b><span class="desk"> · Press Enter to play</span></div>
         <div class="lenwrap"><span class="lbl">Blitz length:</span><div class="len" id="len"></div></div>
+        <div class="lenwrap"><span class="lbl">Practice length:</span><div class="len" id="plen"></div></div>
+        <div class="lenwrap"><button class="focus" id="focus" aria-pressed="false">🎯 Smart focus: more of my tricky facts</button></div>
         <div class="btns">
           <button class="mode" id="gig"><b>Play Blitz</b><span id="gigSub">60 seconds, earn coins</span></button>
-          <button class="mode alt" id="practice"><b>Practice</b>No timer</button>
+          <button class="mode alt" id="practice"><b>Practice</b><span id="pracSub">12 questions, with coach</span></button>
         </div>
       </div>
     </div>
@@ -80,11 +82,16 @@
 </section>
 
 <section id="game" class="hidden">
-  <div class="top"><button class="quit" id="quit">Quit</button><b id="status"></b><b id="streak" class="streak"></b><b id="clock" class="big"></b></div>
+  <div class="top"><button class="quit" id="quit">Quit</button><b id="status"></b><b id="streak" class="streak"></b><button class="quit hidden" id="finishBtn">Finish</button><b id="clock" class="big"></b></div>
   <div class="bar qbar"><i id="qbar"></i></div>
   <div class="gamegrid">
     <div><div class="q big" id="q"></div>
-    <div class="ans" id="ans" aria-live="polite"></div></div>
+    <div class="ans" id="ans" aria-live="polite"></div>
+    <div class="coach hidden" id="coachBox">
+      <div class="coachhd">🎓 Coach <small>(built-in helper, not a live AI)</small></div>
+      <p id="coach"></p>
+      <div class="coachbtns"><button class="quit" id="hintBtn">💡 Hint</button><button class="quit hidden" id="nextBtn">Next →</button></div>
+    </div></div>
     <div class="pad" id="pad"></div>
   </div>
 </section>
@@ -94,6 +101,7 @@
   <div class="score big" id="endScore"></div>
   <p class="sum" id="endSum"></p>
   <p class="sum newbadge" id="endBadge"></p>
+  <p class="tip hidden" id="endCoach"></p>
   <div class="modes">
     <button class="mode" id="again"><b>Play again</b>Same challenge</button>
     <button class="mode alt" id="home2"><b>Home</b>Change challenge</button>

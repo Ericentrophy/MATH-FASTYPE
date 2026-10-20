@@ -11,7 +11,7 @@ var CH=[
 {id:"pct",n:"Percentages",d:"25% of 80",lim:6},
 {id:"dbl",n:"Doubles and halves",d:"Double 37",lim:4},
 {id:"mix",n:"Mixed mayhem",d:"A bit of everything",lim:6,tab:1}];
-var S={coins:0,sel:[2,5,10],max:12,len:60,ch:"times",facts:{},best:{},stats:{games:0,asked:0,right:0,bestStreak:0}};
+var S={coins:0,sel:[2,5,10],max:12,len:60,plen:12,focus:false,ch:"times",facts:{},best:{},stats:{games:0,asked:0,right:0,bestStreak:0}};
 try{var raw=localStorage.getItem("mathRock");if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
 function save(){try{localStorage.setItem("mathRock",JSON.stringify(S))}catch(e){}}
 var $=function(id){return document.getElementById(id)};
@@ -39,12 +39,58 @@ function score(q){if(!q.k)return .5;var f=S.facts[q.k];return f&&f.n?f.c/f.n-(f.
 var G=null,timer=null;
 function pick(){
   var best=null;
-  for(var i=0;i<4;i++){var q=gen(S.ch);if(G.last&&q.t===G.last)continue;if(!best||score(q)<score(best))best=q}
+  for(var i=0;i<(S.focus&&G.mode==="practice"?10:4);i++){var q=gen(S.ch);if(G.last&&q.t===G.last)continue;if(!best||score(q)<score(best))best=q}
   if(!best)best=gen(S.ch);G.last=best.t;return best}
 
 function rng(a,b){var o=[];for(var i=a;i<=b;i++)o.push(i);return o}
 var LV=[{n:"Easy",d:"Tables 2, 5 and 10",sel:[2,5,10],max:12},{n:"Medium",d:"Tables 2 to 6",sel:rng(2,6),max:12},{n:"Hard",d:"Tables 2 to 12",sel:rng(2,12),max:12},{n:"Expert",d:"Tables 2 to 20",sel:rng(2,20),max:20}];
 var LENS=[[30,"30s","30 seconds"],[60,"60s","60 seconds"],[90,"90s","90 seconds"],[120,"2 min","2 minutes"],[180,"3 min","3 minutes"]];
+var PLENS=[[12,"12"],[30,"30"],[50,"50"],[0,"∞"]];
+function plenName(){return S.plen?S.plen+" questions":"Unlimited questions"}
+function hint1(t){
+  if(t.indexOf("?")>-1)return "Think of the times table backwards: what number fits in the gap? Try dividing the big number by the one you can see.";
+  if(t.indexOf("×")>-1)return "Count up in steps of the smaller number, or split one number into easy parts (like 7 × 6 = 5 × 6 + 2 × 6).";
+  if(t.indexOf("÷")>-1)return "Division is a times table backwards. Ask: what number times the small one makes the big one?";
+  if(t.indexOf("²")>-1)return "Squared means the number times itself.";
+  if(t.indexOf("√")>-1)return "Which number times itself makes this number?";
+  if(t.indexOf("%")>-1)return "Start from 10% (divide by 10), then build up: 20% is double, 50% is half, 25% is half of half.";
+  if(t.indexOf("Double")===0)return "Double means add the number to itself. For big numbers, double the tens and the ones separately.";
+  if(t.indexOf("Half")===0)return "Half means split into two equal parts. Halve the tens, then the ones.";
+  if(t.indexOf("+")>-1)return "Split both numbers into tens and ones. Add the tens first, then the ones.";
+  if(t.indexOf("−")>-1)return "Count up from the smaller number to the bigger one instead of taking away.";
+  return "Take your time and break it into small steps."}
+function hint2(q){var s=String(q.a);return "The answer has "+s.length+" digit"+(s.length>1?"s":"")+" and starts with "+s.charAt(0)+"."}
+function coachSay(ok,q,ms){
+  var m,w=0;
+  if(ok){
+    if(G.hl>0)m="Correct, with a little help. Try the next one without a hint!";
+    else if(G.streak>=5)m="🔥 "+G.streak+" in a row! You’re on fire.";
+    else if(ms<2000)m="Correct and fast! ⚡";
+    else m=["Nice one!","Yes! Keep it going.","Correct. Good thinking.","That’s right!"][r(0,3)];
+    $("coachBox").className="coach good"}
+  else{
+    for(var i=G.log.length-1;i>=0&&!G.log[i].ok;i--)w++;
+    m="Not quite. "+q.e;
+    if(w>=3)m+=" Tip: you’ve missed a few in a row. Slow down, press Hint, and say the steps out loud.";
+    $("coachBox").className="coach bad"}
+  $("coach").textContent=m}
+function hintClick(){
+  if(!G||G.mode!=="practice"||G.lock)return;
+  G.hl=Math.min(G.hl+1,3);G.hused++;
+  $("coachBox").className="coach";
+  $("coach").textContent=G.hl===1?"💡 "+hint1(G.q.t):G.hl===2?"💡 "+hint2(G.q):"💡 Full help: "+G.q.e}
+function goNext(){
+  if(!G||!G.wait)return;
+  $("coach").textContent="Ready for the next one? Press Hint if you need help.";
+  $("coachBox").className="coach";after()}
+function endCoach(g){
+  var el=$("endCoach");
+  if(g.mode!=="practice"||!g.asked){el.classList.add("hidden");return}
+  var pct=Math.round(g.score/g.asked*100),bad=g.log.filter(function(x){return !x.ok}).map(function(x){return x.t}),m;
+  m=pct>=90?"Excellent work! You’re ready to try Blitz and earn coins.":pct>=70?"Good job. A bit more practice and these will feel automatic.":"Keep going, mistakes are how your brain learns. Read the “Why” notes below, then try again.";
+  if(bad.length)m+="<br><b>Practise these next:</b> "+bad.slice(0,6).map(esc).join(" · ");
+  if(g.hused)m+="<br>You used "+g.hused+" hint"+(g.hused>1?"s":"")+". Try fewer next round.";
+  el.innerHTML="🎓 <b>Coach says:</b> "+m;el.classList.remove("hidden")}
 function lenName(){for(var i=0;i<LENS.length;i++)if(LENS[i][0]===S.len)return LENS[i][2];return "60 seconds"}
 function fmt(s){return s>=60?Math.floor(s/60)+":"+("0"+s%60).slice(-2):s+"s"}
 function bk(id){return S.len===60?id:id+"@"+S.len}
@@ -66,6 +112,10 @@ function renderHome(){
   LENS.forEach(function(l){var b=document.createElement("button");b.textContent=l[1];b.setAttribute("aria-pressed",S.len===l[0]);b.setAttribute("aria-label","Blitz length "+l[2]);
     b.onclick=function(){S.len=l[0];save();renderHome()};ln.appendChild(b)});
   $("gigSub").textContent=lenName()+", earn coins";
+  var pl=$("plen");pl.innerHTML="";
+  PLENS.forEach(function(l){var b=document.createElement("button");b.textContent=l[1];b.setAttribute("aria-pressed",S.plen===l[0]);b.setAttribute("aria-label","Practice length "+(l[0]||"unlimited"));
+    b.onclick=function(){S.plen=l[0];save();renderHome()};pl.appendChild(b)});
+  $("pracSub").textContent=plenName()+", with coach";$("focus").setAttribute("aria-pressed",!!S.focus);
   var lv=$("levels");lv.innerHTML="";
   LV.forEach(function(l){var b=document.createElement("button");b.className="card";
     var on=S.max===l.max&&JSON.stringify(S.sel.slice().sort(function(x,y){return x-y}))===JSON.stringify(l.sel);
@@ -87,31 +137,35 @@ function renderHome(){
 
 function start(mode){
   S.seen=1;save();
-  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,lim:cur().lim*1000,len:S.len*1000};
+  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:S.plen,lim:cur().lim*1000,len:S.len*1000};
   show("game");$("streak").textContent="";$("status").textContent=(mode==="gig"?"Blitz: ":"Practice: ")+cur().n;
   $("qbar").parentNode.classList.toggle("hidden",mode!=="gig");
+  $("coachBox").className=mode==="practice"?"coach":"coach hidden";$("finishBtn").classList.toggle("hidden",mode!=="practice");
+  $("coach").textContent="I’m your coach. Stuck? Press Hint. I’ll explain every mistake.";
   next();clearInterval(timer);timer=setInterval(tick,50)}
 function next(){
   var q=pick();G.q=q;G.input="";G.lock=false;G.qStart=Date.now();
-  $("q").textContent=q.t;$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%"}
+  $("q").textContent=q.t;$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%";G.hl=0;G.wait=false;$("nextBtn").classList.add("hidden");$("hintBtn").classList.remove("hidden")}
 function tick(){
   if(!G)return;var now=Date.now();
   if(G.mode==="gig"){
     var left=Math.max(0,G.len-(now-G.t0));$("clock").textContent=fmt(Math.ceil(left/1000));
     if(!G.lock){var ql=G.lim-(now-G.qStart);$("qbar").style.width=Math.max(0,ql/G.lim*100)+"%";if(ql<=0)answer(true)}
     if(left<=0&&!G.lock)finish()
-  }else $("clock").textContent=Math.min(G.asked+1,12)+"/12"}
+  }else $("clock").textContent=G.plen?Math.min(G.asked+1,G.plen)+"/"+G.plen:"Q"+(G.asked+1)}
 function answer(timedOut){
   if(G.lock)return;
   var q=G.q,ms=Date.now()-G.qStart,ok=!timedOut&&parseInt(G.input,10)===q.a;
   G.asked++;if(ok){G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak}else G.streak=0;$("streak").textContent=G.streak>1?"🔥 "+G.streak:"";G.log.push({t:q.t,a:q.a,u:(timedOut||G.input==="")?null:G.input,ok:ok,e:q.e||""});
   if(q.k){var f=S.facts[q.k]||(S.facts[q.k]={c:0,n:0,t:3000});f.n++;if(ok){f.c++;f.t=Math.round(f.t*.6+Math.min(ms,6000)*.4)}}
   G.lock=true;
-  if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;after()}
-  else{$("ans").textContent=q.a;$("ans").classList.add("no");setTimeout(after,G.mode==="gig"?600:1500)}}
+  if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;if(G.mode==="practice")coachSay(true,q,ms);after()}
+  else{$("ans").textContent=q.a;$("ans").classList.add("no");
+    if(G.mode==="practice"){coachSay(false,q,ms);G.wait=true;$("nextBtn").classList.remove("hidden");$("hintBtn").classList.add("hidden")}
+    else setTimeout(after,600)}}
 function after(){
   if(!G)return;
-  if(G.mode==="practice"&&G.asked>=12)return finish();
+  if(G.mode==="practice"&&G.plen&&G.asked>=G.plen)return finish();
   if(G.mode==="gig"&&Date.now()-G.t0>=G.len)return finish();
   next()}
 function finish(){
@@ -122,7 +176,7 @@ function finish(){
   $("endScore").textContent=g.score+" / "+g.asked;
   $("endSum").textContent=g.mode==="gig"?"You earned "+g.coins+" coins. Total: "+S.coins+".":"Practice doesn’t earn coins, but it sharpens your skills.";
   var now=earned().filter(function(n){return was.indexOf(n)<0});$("endBadge").textContent=now.length?"🏅 New badge: "+now.join(", "):"";
-  $("endFix").innerHTML=g.log.length?review(g.log):""}
+  $("endFix").innerHTML=g.log.length?review(g.log):"";endCoach(g)}
 function item(x){
   var h="<li class='"+(x.ok?"good":"bad")+"'><div class='rvl'><span class='mk'>"+(x.ok?"✓":"✗")+"</span><b>"+esc(x.t)+" = "+x.a+"</b>";
   if(!x.ok)h+="<span class='you'>You said: "+(x.u===null?"no answer":esc(x.u))+"</span>";
@@ -173,6 +227,7 @@ function renderProgress(){
   $("badges").innerHTML=BADGES.map(function(b){var on=e.indexOf(b[0])>-1;return "<div class='badge"+(on?" on":"")+"'><b>"+(on?"🏅 ":"🔒 ")+b[0]+"</b><small>"+b[1]+"</small></div>"}).join("")}
 $("trickBtn").onclick=function(){ti++;$("trick").textContent=TRICKS[ti%TRICKS.length]};
 function press(d){
+  if(G&&G.wait){if(d==="go")goNext();return}
   if(!G||G.lock||$("game").classList.contains("hidden"))return;
   if(d==="back")G.input=G.input.slice(0,-1);
   else if(d==="go"){if(G.input)answer(false);return}
@@ -189,6 +244,9 @@ document.addEventListener("keydown",function(e){
   else if(e.key==="Enter"){if(G&&!$("game").classList.contains("hidden"))press("go");else if(!$("home").classList.contains("hidden")&&document.activeElement===document.body)start("gig")}});
 $("max").onchange=function(){var v=parseInt($("max").value,10);if(isNaN(v))v=12;v=Math.max(2,Math.min(50,v));S.max=v;S.sel=S.sel.filter(function(x){return x<=v});if(!S.sel.length)S.sel=[2];save();renderHome()};
 $("all").onclick=function(){S.sel=[];for(var i=2;i<=S.max;i++)S.sel.push(i);save();renderHome()};
+$("hintBtn").onclick=hintClick;$("nextBtn").onclick=goNext;
+$("finishBtn").onclick=function(){if(G&&G.mode==="practice")finish()};
+$("focus").onclick=function(){S.focus=!S.focus;save();renderHome()};
 $("gig").onclick=function(){start("gig")};
 $("practice").onclick=function(){start("practice")};
 $("quit").onclick=function(){clearInterval(timer);G=null;renderHome();show("home")};
