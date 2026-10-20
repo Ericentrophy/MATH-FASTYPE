@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Mathlete – Number Challenges</title>
+<title>Mathescent – Number Challenges for Students</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -12,7 +12,7 @@
 <main>
 <section id="home">
   <header>
-    <div><h1>Mathlete</h1><p class="tag">Train your brain, beat the clock, climb the ranks.</p></div>
+    <div><h1>Mathescent</h1><p class="tag">Train your brain, beat the clock, climb the ranks. Built for students.</p></div>
     <div class="statrow"><button class="quit" id="snd" aria-label="Sound on or off">🔊</button><button class="quit" id="theme" aria-label="Switch light or dark">🌓</button><div class="stat"><span>Coins</span><b id="coins">0</b></div><div class="stat"><span>Day streak</span><b id="dstreak">0</b></div></div>
   </header>
   <div class="rank"><b id="rankName" class="big" style="font-size:1.2rem"></b><span id="rankNext" style="color:var(--mid)"></span></div>
@@ -24,14 +24,21 @@
     <details class="how" id="how" open>
       <summary>How to play</summary>
       <ol>
-        <li>Choose a challenge below.</li>
+        <li>Choose your <b>grade</b> (Grade 1–6, High School, or College) and a challenge below.</li>
         <li>Pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
         <li>Type each answer. It checks itself, so you don’t need to press Enter.</li>
         <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer, lets you choose 12, 30, 50 or unlimited questions, and a coach gives hints and explains mistakes.</li>
         <li><b>Hints (Practice only):</b> tap 💡 up to 3 times. Hint 1 is a nudge, hint 2 is a closer clue, hint 3 shows the full steps. On a computer press <b>H</b>. Blitz has no hints, so practise first.</li>
-        <li>After every round you see which answers were right or wrong, and why.</li>
+        <li>After every round you see which answers were right or wrong, why, and your <b>pace</b> (speed vs target).</li>
+        <li><b>Speedrun restart:</b> press <b>R</b> or <b>Ctrl+R</b> (or the ↻ Restart button) to instantly restart the same challenge. Works during a run and on the results screen.</li>
       </ol>
     </details>
+
+    <div id="gradesBox">
+      <h2>Math grade / level</h2>
+      <p class="hint">Pick Grade 1–6 for elementary, or High School / College for advanced pace. Each level sets tables, challenges, and difficulty. Use Custom for full control.</p>
+      <div class="cards" id="grades"></div>
+    </div>
 
     <div id="tablesBox">
       <h2>Pick your tables</h2>
@@ -45,7 +52,7 @@
     </div>
 
     <h2>Choose a challenge</h2>
-    <p class="hint">Pick a challenge, then press Play.</p>
+    <p class="hint">Pick a challenge, then press Play. Challenges available depend on your grade.</p>
     <div class="cards" id="cards"></div>
 
     <h2>Learn the times tables</h2>
@@ -86,8 +93,13 @@
 </section>
 
 <section id="game" class="hidden">
-  <div class="top"><button class="quit" id="quit">Quit</button><b id="status"></b><b id="streak" class="streak"></b><button class="quit hidden" id="finishBtn">Finish</button><b id="clock" class="big"></b></div>
+  <div class="top"><button class="quit" id="quit">Quit</button><button class="quit" id="restart" title="Restart run (R or Ctrl+R)">↻ Restart</button><b id="status"></b><b id="streak" class="streak"></b><button class="quit hidden" id="finishBtn">Finish</button><b id="clock" class="big"></b></div>
   <div class="bar qbar"><i id="qbar"></i></div>
+  <div class="pace-row" id="paceRow">
+    <span class="pace-label">Pace</span>
+    <div class="pace-bar"><i id="paceBar"></i></div>
+    <span class="pace-val" id="paceVal">—</span>
+  </div>
   <div class="gamegrid">
     <div><div class="q big" id="q"></div>
     <div class="ans" id="ans" aria-live="polite"></div>
@@ -106,6 +118,13 @@
   <div class="score big" id="endScore"></div>
   <p class="sum" id="endSum"></p>
   <p class="sum newbadge" id="endBadge"></p>
+
+  <div class="results-panel" id="resultsPanel">
+    <h3>Round results</h3>
+    <div class="stats results-stats" id="endStats"></div>
+    <div class="pace-summary" id="paceSummary"></div>
+  </div>
+
   <p class="tip hidden" id="endCoach"></p>
   <div class="modes">
     <button class="mode" id="again"><b>Play again</b>Same challenge</button>

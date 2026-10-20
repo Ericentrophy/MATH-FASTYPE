@@ -15,9 +15,20 @@ var CH=[
 {id:"ord",n:"Order of operations",d:"2 + 3 × 4",lim:6},
 {id:"frac",n:"Fractions of numbers",d:"¼ of 36",lim:5},
 {id:"mix",n:"Mixed mayhem",d:"A bit of everything",lim:6,tab:1}];
-var S={coins:0,sel:[2,5,10],max:12,len:60,plen:12,focus:false,ch:"times",facts:{},best:{},stats:{games:0,asked:0,right:0,bestStreak:0}};
-try{var raw=localStorage.getItem("mathRock");if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
-function save(){try{localStorage.setItem("mathRock",JSON.stringify(S))}catch(e){}}
+var GRADES=[
+{id:"g1",n:"Grade 1",d:"Counting · simple add & subtract",sel:[2,5,10],max:10,chs:["add","sub","dbl","bond"]},
+{id:"g2",n:"Grade 2",d:"Tables 2, 5, 10 · add & subtract",sel:[2,5,10],max:10,chs:["times","div","add","sub","dbl","bond"]},
+{id:"g3",n:"Grade 3",d:"Tables 2–6 · fractions basics",sel:[2,3,4,5,6],max:12,chs:["times","div","miss","add","sub","dbl","bond","frac"]},
+{id:"g4",n:"Grade 4",d:"Tables 2–12 · percentages & rounding",sel:[2,3,4,5,6,7,8,9,10,11,12],max:12,chs:["times","div","miss","add","sub","sq","pct","dbl","bond","rnd","frac"]},
+{id:"g5",n:"Grade 5",d:"All tables · roots & order of ops",sel:[2,3,4,5,6,7,8,9,10,11,12],max:12,chs:["times","div","miss","add","sub","sq","root","pct","dbl","bond","rnd","ord","frac","mix"]},
+{id:"g6",n:"Grade 6",d:"Extended tables · mixed skills",sel:[2,3,4,5,6,7,8,9,10,11,12,13,14,15],max:15,chs:["times","div","miss","add","sub","sq","root","pct","dbl","bond","rnd","ord","frac","mix"]},
+{id:"hs",n:"High School",d:"Fast fluency · tables to 20",sel:[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],max:20,chs:["times","div","miss","add","sub","sq","root","pct","dbl","bond","rnd","ord","frac","mix"]},
+{id:"college",n:"College",d:"Expert pace · full challenge set",sel:[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],max:20,chs:["times","div","miss","add","sub","sq","root","pct","dbl","bond","rnd","ord","frac","mix"]},
+{id:"custom",n:"Custom",d:"Your own tables & challenges",sel:null,max:null,chs:null}
+];
+var S={coins:0,sel:[2,5,10],max:12,len:60,plen:12,focus:false,ch:"times",grade:"g3",facts:{},best:{},stats:{games:0,asked:0,right:0,bestStreak:0}};
+try{var raw=localStorage.getItem("mathescent");if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
+function save(){try{localStorage.setItem("mathescent",JSON.stringify(S))}catch(e){}}
 var $=function(id){return document.getElementById(id)};
 function show(id){["home","game","end"].forEach(function(x){$(x).classList.toggle("hidden",x!==id)});window.scrollTo(0,0)}
 function cur(){return CH.filter(function(c){return c.id===S.ch})[0]||CH[0]}
@@ -123,8 +134,16 @@ function renderHome(){
   $("rankName").textContent=RANKS[i][1];
   $("rankNext").textContent=nx?(nx[0]-S.coins)+" coins to "+nx[1]:"Top of the bill";
   $("rankBar").style.width=(nx?(S.coins-RANKS[i][0])/(nx[0]-RANKS[i][0])*100:100)+"%";
+  var gr=$("grades");if(gr){gr.innerHTML="";
+  GRADES.forEach(function(g){var b=document.createElement("button");b.className="card";
+    b.setAttribute("aria-pressed",g.id===S.grade);
+    b.innerHTML="<b>"+g.n+"</b><small>"+g.d+"</small>";
+    b.onclick=function(){S.grade=g.id;if(g.sel){S.sel=g.sel.slice();S.max=g.max;}if(g.chs&&g.chs.indexOf(S.ch)<0)S.ch=g.chs[0];save();renderHome()};
+    gr.appendChild(b)});}
+  var allowed=null;for(var gi=0;gi<GRADES.length;gi++)if(GRADES[gi].id===S.grade)allowed=GRADES[gi].chs;
   var c=$("cards");c.innerHTML="";
-  CH.forEach(function(ch){var b=document.createElement("button");b.className="card";
+  CH.forEach(function(ch){if(allowed&&allowed.indexOf(ch.id)<0)return;
+    var b=document.createElement("button");b.className="card";
     b.setAttribute("aria-pressed",ch.id===S.ch);
     b.innerHTML="<b>"+ch.n+"</b><small>"+ch.d+(S.best[bk(ch.id)]?" · Best "+S.best[bk(ch.id)]:"")+"</small>";
     b.onclick=function(){S.ch=ch.id;save();renderHome()};c.appendChild(b)});
@@ -158,7 +177,8 @@ function renderHome(){
 
 function start(mode,queue){
   S.seen=1;S.tried=S.tried||{};S.tried[S.ch]=1;save();
-  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:queue?queue.length:S.plen,queue:queue||null,lim:cur().lim*1000,len:S.len*1000};
+  var _lim=cur().lim*1000;if(S.grade==="hs")_lim=Math.round(_lim*0.85);if(S.grade==="college")_lim=Math.round(_lim*0.7);
+  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:queue?queue.length:S.plen,queue:queue||null,lim:_lim,len:S.len*1000,times:[],paceTarget:_lim};
   show("game");$("streak").textContent="";$("status").textContent=(mode==="gig"?"Blitz: ":"Practice: ")+cur().n;
   $("qbar").parentNode.classList.toggle("hidden",mode!=="gig");
   $("coachBox").className=mode==="practice"?"coach":"coach hidden";$("finishBtn").classList.toggle("hidden",mode!=="practice");
@@ -166,7 +186,7 @@ function start(mode,queue){
   next();clearInterval(timer);timer=setInterval(tick,50)}
 function next(){
   var q=pick();G.q=q;G.input="";G.lock=false;G.qStart=Date.now();
-  $("q").textContent=q.t;$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%";G.hl=0;G.wait=false;$("nextBtn").classList.add("hidden");$("hintBtn").classList.remove("hidden");hintBtn()}
+  $("q").textContent=q.t;$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%";G.hl=0;G.wait=false;$("nextBtn").classList.add("hidden");$("hintBtn").classList.remove("hidden");hintBtn();if(G.times&&G.times.length)updatePace();else{var pb=$("paceBar"),pv=$("paceVal");if(pb){pb.style.width="50%";pb.className="";}if(pv)pv.textContent="—";}}
 function tick(){
   if(!G)return;var now=Date.now();
   if(G.mode==="gig"){
@@ -177,7 +197,8 @@ function tick(){
 function answer(timedOut){
   if(G.lock)return;
   var q=G.q,ms=Date.now()-G.qStart,ok=!timedOut&&parseInt(G.input,10)===q.a;
-  G.asked++;if(ok){G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak}else G.streak=0;$("streak").textContent=G.streak>1?"🔥 "+G.streak:"";G.log.push({t:q.t,a:q.a,u:(timedOut||G.input==="")?null:G.input,ok:ok,e:q.e||"",q:q});
+  G.asked++;if(ok){G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak}else G.streak=0;$("streak").textContent=G.streak>1?"🔥 "+G.streak:"";G.log.push({t:q.t,a:q.a,u:(timedOut||G.input==="")?null:G.input,ok:ok,e:q.e||"",q:q,ms:ms});
+  if(!timedOut){G.times.push(ms);updatePace();}
   if(q.k){var f=S.facts[q.k]||(S.facts[q.k]={c:0,n:0,t:3000});f.n++;if(ok){f.c++;f.t=Math.round(f.t*.6+Math.min(ms,6000)*.4)}}
   G.lock=true;beep(ok?660:220);
   if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;if(G.mode==="gig"&&G.streak%5===0){G.coins+=3;$("streak").textContent+=" +3🪙"}if(G.mode==="practice")coachSay(true,q,ms);after()}
@@ -201,6 +222,7 @@ function finish(){
   $("endTitle").textContent=g.mode==="gig"?"Encore!":"Nice practice!";
   $("endScore").textContent=g.score+" / "+g.asked;
   $("endSum").textContent=g.mode==="gig"?"You earned "+g.coins+" coins. Total: "+S.coins+".":"Practice doesn’t earn coins, but it sharpens your skills.";
+  renderEndResults(g);
   var now=earned().filter(function(n){return was.indexOf(n)<0});$("endBadge").textContent=now.length?"🏅 New badge: "+now.join(", "):"";
   $("endFix").innerHTML=g.log.length?review(g.log):"";
   if(g.goal)$("endSum").textContent+=" 🎯 Daily goal reached: +20 bonus coins!";
@@ -319,13 +341,24 @@ function press(d){
   ].forEach(function(k){mk(np,k[0],k[1],k[2],k[3])});
   var wrap=document.createElement("div");wrap.className="kbwrap";
   wrap.appendChild(main);wrap.appendChild(np);kb.appendChild(wrap);
-  function set(e,on){var l=keys[e.code];if(l)l.forEach(function(x){x.classList.toggle("down",on)})}
+    function set(e,on){var l=keys[e.code];if(l)l.forEach(function(x){x.classList.toggle("down",on)})}
   document.addEventListener("keydown",function(e){set(e,true)});
   document.addEventListener("keyup",function(e){set(e,false)});
   window.addEventListener("blur",function(){for(var k in keys)keys[k].forEach(function(x){x.classList.remove("down")})});
 })();
+function restartRun(){
+  if($("home")&&!$("home").classList.contains("hidden"))return;
+  if(!G)return;
+  var mode=G.mode;
+  clearInterval(timer);
+  G=null;
+  start(mode);
+}
 document.addEventListener("keydown",function(e){
   if(e.key==="Enter"&&G&&!$("game").classList.contains("hidden"))e.preventDefault();
+  var inRun=G&&(!$("game").classList.contains("hidden")||!$("end").classList.contains("hidden"));
+  if(inRun&&((e.key==="r"||e.key==="R")||((e.ctrlKey||e.metaKey)&&(e.key==="r"||e.key==="R")))){
+    e.preventDefault();restartRun();return}
   if((e.key==="h"||e.key==="H")&&G&&!$("game").classList.contains("hidden")){hintClick();return}
   if(e.key>="0"&&e.key<="9")press(e.key);
   else if(e.key==="Backspace")press("back");
@@ -344,8 +377,47 @@ applyTheme();$("snd").textContent=S.snd===false?"🔇":"🔊";
 $("gig").onclick=function(){start("gig")};
 $("practice").onclick=function(){start("practice")};
 $("quit").onclick=function(){clearInterval(timer);G=null;renderHome();show("home")};
+
+$("restart").onclick=function(){restartRun()};
 $("again").onclick=function(){start(G.mode)};
 $("home2").onclick=function(){G=null;renderHome();show("home")};
+
+function updatePace(){
+  if(!G||!G.times.length)return;
+  var avg=G.times.reduce(function(a,b){return a+b},0)/G.times.length;
+  var target=G.paceTarget||3000;
+  var ratio=Math.min(2,Math.max(0,target/Math.max(avg,1)));
+  var pct=Math.round(ratio*50);
+  var bar=$("paceBar"),val=$("paceVal");
+  if(!bar)return;
+  bar.style.width=pct+"%";
+  bar.className="";
+  if(avg<=target*0.7){bar.classList.add("fast");val.textContent="Fast "+Math.round(avg/100)/10+"s"}
+  else if(avg>=target*1.2){bar.classList.add("slow");val.textContent="Slow "+Math.round(avg/100)/10+"s"}
+  else{val.textContent=Math.round(avg/100)/10+"s"}
+}
+function renderEndResults(g){
+  var el=$("endStats"),ps=$("paceSummary");
+  if(!el)return;
+  var acc=g.asked?Math.round(g.score/g.asked*100):0;
+  var times=g.times||[];
+  var avg=times.length?Math.round(times.reduce(function(a,b){return a+b},0)/times.length):0;
+  var best=times.length?Math.min.apply(null,times):0;
+  var target=g.paceTarget||3000;
+  el.innerHTML=[["Correct",g.score+"/"+g.asked],["Accuracy",acc+"%"],["Best streak",g.maxStreak],["Avg time",avg?Math.round(avg/100)/10+"s":"—"],["Fastest",best?Math.round(best/100)/10+"s":"—"],["Coins",g.coins||0]].map(function(x){return "<div><b>"+x[1]+"</b><span>"+x[0]+"</span></div>"}).join("");
+  if(ps){
+    var paceMsg;
+    if(!times.length)paceMsg="No timed answers this round.";
+    else if(avg<=target*0.7)paceMsg="⚡ <b>Great pace!</b> Average "+(Math.round(avg/100)/10)+"s per question (target ~"+(Math.round(target/100)/10)+"s).";
+    else if(avg>=target*1.2)paceMsg="🐢 <b>Take your time</b> — average "+(Math.round(avg/100)/10)+"s. Practice mode helps you speed up safely.";
+    else paceMsg="🎯 <b>Solid pace.</b> Average "+(Math.round(avg/100)/10)+"s per question (target ~"+(Math.round(target/100)/10)+"s).";
+    if(g.mode==="gig")paceMsg+=" Blitz rewards faster correct answers with extra coins.";
+    ps.innerHTML=paceMsg;
+  }
+}
+
+
+
 renderHome();
 if(S.seen)$("how").removeAttribute("open");
 })();
