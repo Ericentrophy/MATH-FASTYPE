@@ -154,3 +154,22 @@ h3{font-family:Bungee,Impact,"Arial Black",sans-serif;font-weight:400;font-size:
 button:disabled{opacity:.4;cursor:default}
 .fixes small{color:var(--mid)}
 .modes{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+/* ===== Arcade background ===== */
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
+  background:
+    radial-gradient(60% 45% at 15% 0%,color-mix(in srgb,var(--good) 16%,transparent),transparent 70%),
+    radial-gradient(55% 40% at 100% 100%,color-mix(in srgb,var(--bad) 13%,transparent),transparent 70%),
+    linear-gradient(color-mix(in srgb,var(--ink) 7%,transparent) 2px,transparent 2px) 0 0/32px 32px,
+    linear-gradient(90deg,color-mix(in srgb,var(--ink) 7%,transparent) 2px,transparent 2px) 0 0/32px 32px,
+    var(--bg)}
+.bg span{position:absolute;left:var(--x);bottom:-6rem;font:400 var(--s)/1 Bungee,Impact,"Arial Black",sans-serif;
+  color:color-mix(in srgb,var(--ink) 13%,transparent);
+  animation:rise var(--d) linear var(--dl) infinite}
+.bg span.g{color:color-mix(in srgb,var(--good) 24%,transparent)}
+.bg span.b{color:color-mix(in srgb,var(--bad) 22%,transparent)}
+@keyframes rise{from{transform:translate3d(0,0,0)}to{transform:translate3d(0,-125vh,0)}}
+@media(max-width:700px){.bg span:nth-child(n+8){display:none}}
+.card,.panel,.how,.tip,.stat,.tlist div,.stats div,.badge{background:color-mix(in srgb,var(--bg) 80%,transparent)}
+.card[aria-pressed="true"]{background:var(--ink)}
+.badge.on{background:color-mix(in srgb,var(--good) 18%,var(--bg))}
+@media (prefers-reduced-motion:reduce){.bg span{animation:none;bottom:auto;top:calc(10% + var(--x))}}
