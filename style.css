@@ -147,3 +147,10 @@ h3{font-family:Bungee,Impact,"Arial Black",sans-serif;font-weight:400;font-size:
 .coach p{margin:6px 0 10px;min-height:2.8em;line-height:1.45}
 .coachbtns{display:flex;gap:10px;flex-wrap:wrap}
 .coach.bad{border-color:var(--bad)}.coach.good{border-color:var(--good)}
+.statrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.statrow .quit{padding:4px 10px}
+.goal{margin:8px 0 0;font-size:.9rem;color:var(--mid)}
+.coach.hint{border-style:dashed}
+button:disabled{opacity:.4;cursor:default}
+.fixes small{color:var(--mid)}
+.modes{grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}

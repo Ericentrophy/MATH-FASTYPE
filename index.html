@@ -12,10 +12,11 @@
 <section id="home">
   <header>
     <div><h1>Mathlete</h1><p class="tag">Train your brain, beat the clock, climb the ranks.</p></div>
-    <div class="stat"><span>Coins</span><b id="coins">0</b></div>
+    <div class="statrow"><button class="quit" id="snd" aria-label="Sound on or off">🔊</button><button class="quit" id="theme" aria-label="Switch light or dark">🌓</button><div class="stat"><span>Coins</span><b id="coins">0</b></div><div class="stat"><span>Day streak</span><b id="dstreak">0</b></div></div>
   </header>
   <div class="rank"><b id="rankName" class="big" style="font-size:1.2rem"></b><span id="rankNext" style="color:var(--mid)"></span></div>
   <div class="bar"><i id="rankBar"></i></div>
+  <p class="goal" id="goal"></p>
 
   <div class="layout">
   <div class="col-main">
@@ -26,6 +27,7 @@
         <li>Pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
         <li>Type each answer. It checks itself, so you don’t need to press Enter.</li>
         <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer, lets you choose 12, 30, 50 or unlimited questions, and a coach gives hints and explains mistakes.</li>
+        <li><b>Hints (Practice only):</b> tap 💡 up to 3 times. Hint 1 is a nudge, hint 2 is a closer clue, hint 3 shows the full steps. On a computer press <b>H</b>. Blitz has no hints, so practise first.</li>
         <li>After every round you see which answers were right or wrong, and why.</li>
       </ol>
     </details>
@@ -57,6 +59,7 @@
       <div class="panel"><h3>Stats</h3><div class="stats" id="stats"></div></div>
       <div class="panel"><h3>Math trick</h3><p id="trick" class="trick"></p><button class="quit" id="trickBtn">Another trick</button></div>
     </div>
+    <div class="panel"><h3>My tricky facts</h3><ul class="fixes" id="tricky"></ul><button class="quit" id="trainBtn">Train these in Practice</button></div>
     <div class="panel"><h3>Badges <span id="badgeCount"></span></h3><div class="badges" id="badges"></div></div>
 
     <h2>Times tables set list (2 to 12)</h2>
@@ -104,6 +107,7 @@
   <p class="tip hidden" id="endCoach"></p>
   <div class="modes">
     <button class="mode" id="again"><b>Play again</b>Same challenge</button>
+    <button class="mode hidden" id="retry"><b>Fix my mistakes</b>Redo only the ones you missed</button>
     <button class="mode alt" id="home2"><b>Home</b>Change challenge</button>
   </div>
   <div id="endFix"></div>

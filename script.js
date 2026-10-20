@@ -10,6 +10,10 @@ var CH=[
 {id:"root",n:"Square roots",d:"√49 = 7",lim:4},
 {id:"pct",n:"Percentages",d:"25% of 80",lim:6},
 {id:"dbl",n:"Doubles and halves",d:"Double 37",lim:4},
+{id:"bond",n:"Make 100",d:"63 + ? = 100",lim:6},
+{id:"rnd",n:"Rounding",d:"Round 47 to the nearest 10",lim:6},
+{id:"ord",n:"Order of operations",d:"2 + 3 × 4",lim:6},
+{id:"frac",n:"Fractions of numbers",d:"¼ of 36",lim:5},
 {id:"mix",n:"Mixed mayhem",d:"A bit of everything",lim:6,tab:1}];
 var S={coins:0,sel:[2,5,10],max:12,len:60,plen:12,focus:false,ch:"times",facts:{},best:{},stats:{games:0,asked:0,right:0,bestStreak:0}};
 try{var raw=localStorage.getItem("mathRock");if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
@@ -34,10 +38,17 @@ function gen(id){
   if(id==="root"){n=r(2,Math.max(15,S.max));return{t:"√"+n*n,a:n,k:"s"+n,e:"√"+n*n+" asks which number times itself makes "+n*n+". "+n+" × "+n+" = "+n*n+", so the answer is "+n+"."}}
   if(id==="pct"){m=[10,20,25,50,75][r(0,4)];b=r(1,10)*20;return{t:m+"% of "+b,a:b*m/100,e:({10:"10% is one tenth, so divide by 10",20:"20% is one fifth, so divide by 5",25:"25% is a quarter, so halve it twice",50:"50% is half, so divide by 2",75:"75% is three quarters, so find a quarter and multiply by 3"})[m]+": "+m+"% of "+b+" = "+b*m/100+"."}}
   if(id==="dbl"){n=r(3,50);return Math.random()<.5?{t:"Double "+n,a:n*2,e:"Double means times 2: "+n+" + "+n+" = "+n*2+"."}:{t:"Half of "+n*2,a:n,e:"Half means split into 2 equal parts. "+n+" + "+n+" = "+n*2+", so half of "+n*2+" is "+n+"."}}
+  if(id==="bond"){a=r(11,89);return{t:a+" + ? = 100",a:100-a,e:a+" + ? = 100. Count up: "+a+" + "+(100-a)+" = 100, so the missing number is "+(100-a)+"."}}
+  if(id==="rnd"){b=r(0,1)?10:100;n=r(11,b===10?98:980);if(n%b===b/2)n++;a=Math.round(n/b)*b;return{t:"Round "+n+" to the nearest "+b,a:a,e:n+" is between "+Math.floor(n/b)*b+" and "+(Math.floor(n/b)*b+b)+". It is closer to "+a+"."}}
+  if(id==="ord"){a=r(2,9);b=r(2,9);n=r(2,9);return{t:a+" + "+b+" × "+n,a:a+b*n,e:"Multiply first: "+b+" × "+n+" = "+b*n+". Then add "+a+" to get "+(a+b*n)+"."}}
+  if(id==="frac"){m=[["½",2],["¼",4],["⅓",3]][r(0,2)];b=m[1]*r(2,12);return{t:m[0]+" of "+b,a:b/m[1],e:m[0]+" means split "+b+" into "+m[1]+" equal parts. "+b+" ÷ "+m[1]+" = "+b/m[1]+"."}}
 }
 function score(q){if(!q.k)return .5;var f=S.facts[q.k];return f&&f.n?f.c/f.n-(f.t>2500?.2:0):-1}
-var G=null,timer=null;
+var G=null,timer=null,RETRY=[],GOAL=30,ac=null;
+function day(){return Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5)}
+function beep(f){if(S.snd===false)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.12)}catch(e){}}
 function pick(){
+  if(G.queue&&G.queue.length){var rq=G.queue.shift();G.last=rq.t;return rq}
   var best=null;
   for(var i=0;i<(S.focus&&G.mode==="practice"?10:4);i++){var q=gen(S.ch);if(G.last&&q.t===G.last)continue;if(!best||score(q)<score(best))best=q}
   if(!best)best=gen(S.ch);G.last=best.t;return best}
@@ -47,19 +58,27 @@ var LV=[{n:"Easy",d:"Tables 2, 5 and 10",sel:[2,5,10],max:12},{n:"Medium",d:"Tab
 var LENS=[[30,"30s","30 seconds"],[60,"60s","60 seconds"],[90,"90s","90 seconds"],[120,"2 min","2 minutes"],[180,"3 min","3 minutes"]];
 var PLENS=[[12,"12"],[30,"30"],[50,"50"],[0,"∞"]];
 function plenName(){return S.plen?S.plen+" questions":"Unlimited questions"}
-function hint1(t){
-  if(t.indexOf("?")>-1)return "Think of the times table backwards: what number fits in the gap? Try dividing the big number by the one you can see.";
-  if(t.indexOf("×")>-1)return "Count up in steps of the smaller number, or split one number into easy parts (like 7 × 6 = 5 × 6 + 2 × 6).";
-  if(t.indexOf("÷")>-1)return "Division is a times table backwards. Ask: what number times the small one makes the big one?";
-  if(t.indexOf("²")>-1)return "Squared means the number times itself.";
-  if(t.indexOf("√")>-1)return "Which number times itself makes this number?";
-  if(t.indexOf("%")>-1)return "Start from 10% (divide by 10), then build up: 20% is double, 50% is half, 25% is half of half.";
-  if(t.indexOf("Double")===0)return "Double means add the number to itself. For big numbers, double the tens and the ones separately.";
-  if(t.indexOf("Half")===0)return "Half means split into two equal parts. Halve the tens, then the ones.";
-  if(t.indexOf("+")>-1)return "Split both numbers into tens and ones. Add the tens first, then the ones.";
-  if(t.indexOf("−")>-1)return "Count up from the smaller number to the bigger one instead of taking away.";
-  return "Take your time and break it into small steps."}
-function hint2(q){var s=String(q.a);return "The answer has "+s.length+" digit"+(s.length>1?"s":"")+" and starts with "+s.charAt(0)+"."}
+function hints(q){
+  var t=q.t,a=q.a,m,s,l,n,b,T=function(v){return v-v%10},mul=function(k,c){var o=[];for(var i=1;i<=c;i++)o.push(k*i);return o.join(", ")};
+  if(m=t.match(/^\? × (\d+) = (\d+)$/)||t.match(/^(\d+) × \? = (\d+)$/))return["Flip it into a division: "+m[2]+" ÷ "+m[1]+" = ?","Count by "+m[1]+"s: "+mul(+m[1],4)+"… How many jumps to reach "+m[2]+"?"];
+  if(m=t.match(/^(\d+) \+ \? = 100$/)){n=T(+m[1])+10;return["How far is "+m[1]+" from 100? Jump to the next ten first.","From "+m[1]+" to "+n+" is "+(n-m[1])+". From "+n+" to 100 is "+(100-n)+". Add the two jumps."]}
+  if(m=t.match(/^(\d+) × (\d+)$/)){s=Math.min(m[1],m[2]);l=Math.max(m[1],m[2]);
+    if(l>10)return["Split "+l+" into "+T(l)+" and "+l%10+".",T(l)+" × "+s+" = "+T(l)*s+" and "+l%10+" × "+s+" = "+l%10*s+". Now add them."];
+    return["Think of "+s+" groups of "+l+". Count by "+l+"s.","Count by "+l+"s: "+mul(l,s-1)+"… one more jump to go."]}
+  if(m=t.match(/^(\d+) ÷ (\d+)$/))return["Ask: "+m[2]+" × ? = "+m[1]+". Use your times table backwards.","Count by "+m[2]+"s: "+mul(+m[2],4)+"… until you reach "+m[1]+". Count the jumps."];
+  if(m=t.match(/^(\d+)²$/)){n=+m[1];return[n+"² means "+n+" × "+n+".","Try "+n+" × "+(n-1)+" = "+n*(n-1)+", then add one more "+n+"."]}
+  if(t.charAt(0)==="√")return["Which number times itself makes "+t.slice(1)+"?","Test "+(a-1)+" × "+(a-1)+" = "+(a-1)*(a-1)+" (too small) and "+(a+1)+" × "+(a+1)+" = "+(a+1)*(a+1)+" (too big). What fits between?"];
+  if(m=t.match(/^(\d+)% of (\d+)$/)){b=+m[2];var P=+m[1];
+    if(P===10)return["10% means one tenth. Divide by 10.","Split "+b+" into 10 equal parts. One part is the answer."];
+    return[{20:"20% is two lots of 10%. Find 10% first: "+b+" ÷ 10.",25:"25% is a quarter: halve it, then halve again.",50:"50% means half.",75:"75% is three quarters. Find a quarter first."}[P],{20:"10% is "+b/10+". Now double it.",25:"Half of "+b+" is "+b/2+". Now halve that.",50:"Split "+b+" into 2 equal parts.",75:"A quarter of "+b+" is "+b/4+". Now multiply by 3."}[P]]}
+  if(m=t.match(/^Double (\d+)$/)){n=+m[1];return["Double the tens and the ones separately.","Double "+T(n)+" = "+T(n)*2+" and double "+n%10+" = "+n%10*2+". Add them."]}
+  if(m=t.match(/^Half of (\d+)$/)){n=+m[1];return["Halve the tens, then halve the ones.","Half of "+T(n)+" is "+T(n)/2+" and half of "+n%10+" is "+n%10/2+". Add them."]}
+  if(m=t.match(/^(½|¼|⅓) of (\d+)$/)){n={"½":2,"¼":4,"⅓":3}[m[1]];return["Split "+m[2]+" into "+n+" equal parts. That is "+m[2]+" ÷ "+n+".",n===4?"Halve "+m[2]+" to get "+m[2]/2+", then halve again.":"Use your times tables backwards: "+n+" × ? = "+m[2]]}
+  if(m=t.match(/^Round (\d+) to the nearest (\d+)$/)){n=+m[1];b=+m[2];return["Look at the "+(b===10?"last digit":"last two digits")+": halfway or more rounds up, less rounds down.",n+" sits between "+Math.floor(n/b)*b+" and "+(Math.floor(n/b)*b+b)+". Which one is closer?"]}
+  if(m=t.match(/^(\d+) \+ (\d+) × (\d+)$/))return["Multiply before you add (BODMAS).",m[2]+" × "+m[3]+" = "+m[2]*m[3]+". Now add "+m[1]+"."];
+  if(m=t.match(/^(\d+) \+ (\d+)$/))return["Add the tens first: "+T(+m[1])+" + "+T(+m[2])+" = "+(T(+m[1])+T(+m[2]))+".","Now add the ones: "+m[1]%10+" + "+m[2]%10+" = "+(m[1]%10+m[2]%10)+". Put the two parts together."];
+  if(m=t.match(/^(\d+) − (\d+)$/)){b=+m[2];n=T(b)+10;return["Count up from "+b+" to "+m[1]+" instead of taking away.",n<=m[1]?"Jump from "+b+" to "+n+" (that is "+(n-b)+"), then from "+n+" to "+m[1]+". Add the jumps.":"Count up in small steps from "+b+" to "+m[1]+"."]}
+  return["Break it into small steps.","The answer has "+String(a).length+" digit(s) and starts with "+String(a).charAt(0)+"."]}
 function coachSay(ok,q,ms){
   var m,w=0;
   if(ok){
@@ -74,14 +93,15 @@ function coachSay(ok,q,ms){
     if(w>=3)m+=" Tip: you’ve missed a few in a row. Slow down, press Hint, and say the steps out loud.";
     $("coachBox").className="coach bad"}
   $("coach").textContent=m}
+function hintBtn(){var b=$("hintBtn"),n=G?G.hl:0;b.textContent=n===0?"💡 Need a hint?":n===1?"💡 Another hint (2/3)":n===2?"💡 Show full steps (3/3)":"💡 No more hints";b.disabled=n>=3}
 function hintClick(){
-  if(!G||G.mode!=="practice"||G.lock)return;
-  G.hl=Math.min(G.hl+1,3);G.hused++;
-  $("coachBox").className="coach";
-  $("coach").textContent=G.hl===1?"💡 "+hint1(G.q.t):G.hl===2?"💡 "+hint2(G.q):"💡 Full help: "+G.q.e}
+  if(!G||G.mode!=="practice"||G.lock||G.hl>=3)return;
+  G.hl++;G.hused++;var H=hints(G.q);
+  $("coachBox").className="coach hint";
+  $("coach").textContent="💡 Hint "+G.hl+" of 3: "+(G.hl<3?H[G.hl-1]:"Full steps. "+G.q.e);hintBtn()}
 function goNext(){
   if(!G||!G.wait)return;
-  $("coach").textContent="Ready for the next one? Press Hint if you need help.";
+  $("coach").textContent="Next question! Stuck? Tap 💡 for a step-by-step hint.";
   $("coachBox").className="coach";after()}
 function endCoach(g){
   var el=$("endCoach");
@@ -96,7 +116,8 @@ function fmt(s){return s>=60?Math.floor(s/60)+":"+("0"+s%60).slice(-2):s+"s"}
 function bk(id){return S.len===60?id:id+"@"+S.len}
 function lvName(){for(var i=0;i<LV.length;i++){if(S.max===LV[i].max&&JSON.stringify(S.sel.slice().sort(function(x,y){return x-y}))===JSON.stringify(LV[i].sel))return LV[i].n}return "Custom"}
 function renderHome(){
-  $("coins").textContent=S.coins;
+  $("coins").textContent=S.coins;$("dstreak").textContent=S.last>=day()-1?S.ds||0:0;
+  var tn=S.td&&S.td.d===day()?S.td.n:0;$("goal").textContent=tn>=GOAL?"🎯 Daily goal done! "+tn+" correct today":"🎯 Daily goal: "+tn+"/"+GOAL+" correct answers today (+20 coins)";
   var i=0;for(var k=0;k<RANKS.length;k++)if(S.coins>=RANKS[k][0])i=k;
   var nx=RANKS[i+1];
   $("rankName").textContent=RANKS[i][1];
@@ -135,17 +156,17 @@ function renderHome(){
     h+="</tr>"}
   $("grid").innerHTML=h+"</table>";renderLearn();renderProgress()}
 
-function start(mode){
-  S.seen=1;save();
-  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:S.plen,lim:cur().lim*1000,len:S.len*1000};
+function start(mode,queue){
+  S.seen=1;S.tried=S.tried||{};S.tried[S.ch]=1;save();
+  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:queue?queue.length:S.plen,queue:queue||null,lim:cur().lim*1000,len:S.len*1000};
   show("game");$("streak").textContent="";$("status").textContent=(mode==="gig"?"Blitz: ":"Practice: ")+cur().n;
   $("qbar").parentNode.classList.toggle("hidden",mode!=="gig");
   $("coachBox").className=mode==="practice"?"coach":"coach hidden";$("finishBtn").classList.toggle("hidden",mode!=="practice");
-  $("coach").textContent="I’m your coach. Stuck? Press Hint. I’ll explain every mistake.";
+  $("coach").textContent="I’m your coach. Stuck? Tap 💡 (or press H) for up to 3 hints: a nudge, a closer clue, then the full steps. I’ll explain every mistake.";
   next();clearInterval(timer);timer=setInterval(tick,50)}
 function next(){
   var q=pick();G.q=q;G.input="";G.lock=false;G.qStart=Date.now();
-  $("q").textContent=q.t;$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%";G.hl=0;G.wait=false;$("nextBtn").classList.add("hidden");$("hintBtn").classList.remove("hidden")}
+  $("q").textContent=q.t;$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%";G.hl=0;G.wait=false;$("nextBtn").classList.add("hidden");$("hintBtn").classList.remove("hidden");hintBtn()}
 function tick(){
   if(!G)return;var now=Date.now();
   if(G.mode==="gig"){
@@ -156,10 +177,10 @@ function tick(){
 function answer(timedOut){
   if(G.lock)return;
   var q=G.q,ms=Date.now()-G.qStart,ok=!timedOut&&parseInt(G.input,10)===q.a;
-  G.asked++;if(ok){G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak}else G.streak=0;$("streak").textContent=G.streak>1?"🔥 "+G.streak:"";G.log.push({t:q.t,a:q.a,u:(timedOut||G.input==="")?null:G.input,ok:ok,e:q.e||""});
+  G.asked++;if(ok){G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak}else G.streak=0;$("streak").textContent=G.streak>1?"🔥 "+G.streak:"";G.log.push({t:q.t,a:q.a,u:(timedOut||G.input==="")?null:G.input,ok:ok,e:q.e||"",q:q});
   if(q.k){var f=S.facts[q.k]||(S.facts[q.k]={c:0,n:0,t:3000});f.n++;if(ok){f.c++;f.t=Math.round(f.t*.6+Math.min(ms,6000)*.4)}}
-  G.lock=true;
-  if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;if(G.mode==="practice")coachSay(true,q,ms);after()}
+  G.lock=true;beep(ok?660:220);
+  if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;if(G.mode==="gig"&&G.streak%5===0){G.coins+=3;$("streak").textContent+=" +3🪙"}if(G.mode==="practice")coachSay(true,q,ms);after()}
   else{$("ans").textContent=q.a;$("ans").classList.add("no");
     if(G.mode==="practice"){coachSay(false,q,ms);G.wait=true;$("nextBtn").classList.remove("hidden");$("hintBtn").classList.add("hidden")}
     else setTimeout(after,600)}}
@@ -170,13 +191,20 @@ function after(){
   next()}
 function finish(){
   clearInterval(timer);var g=G,was=earned();g.lock=true;S.coins+=g.coins;S.stats.games++;S.stats.asked+=g.asked;S.stats.right+=g.score;S.stats.bestStreak=Math.max(S.stats.bestStreak,g.maxStreak);
+  var d=day(),pre;if(S.last!==d){S.ds=S.last===d-1?(S.ds||0)+1:1;S.last=d}S.stats.bestDs=Math.max(S.stats.bestDs||0,S.ds);
+  if(!S.td||S.td.d!==d)S.td={d:d,n:0};pre=S.td.n;S.td.n+=g.score;
+  if(pre<GOAL&&S.td.n>=GOAL){S.coins+=20;S.stats.goals=(S.stats.goals||0)+1;g.goal=1}
+  if(g.mode==="practice"&&g.asked>=12&&!g.hused&&g.score/g.asked>=.9)S.stats.nh=(S.stats.nh||0)+1;
+  if(g.queue&&g.asked&&g.score===g.asked)S.stats.fixed=(S.stats.fixed||0)+1;
   if(g.mode==="gig"&&g.score>(S.best[bk(S.ch)]||0))S.best[bk(S.ch)]=g.score;
   save();show("end");
   $("endTitle").textContent=g.mode==="gig"?"Encore!":"Nice practice!";
   $("endScore").textContent=g.score+" / "+g.asked;
   $("endSum").textContent=g.mode==="gig"?"You earned "+g.coins+" coins. Total: "+S.coins+".":"Practice doesn’t earn coins, but it sharpens your skills.";
   var now=earned().filter(function(n){return was.indexOf(n)<0});$("endBadge").textContent=now.length?"🏅 New badge: "+now.join(", "):"";
-  $("endFix").innerHTML=g.log.length?review(g.log):"";endCoach(g)}
+  $("endFix").innerHTML=g.log.length?review(g.log):"";
+  if(g.goal)$("endSum").textContent+=" 🎯 Daily goal reached: +20 bonus coins!";
+  RETRY=g.log.filter(function(x){return !x.ok}).map(function(x){return x.q});$("retry").classList.toggle("hidden",!RETRY.length);endCoach(g)}
 function item(x){
   var h="<li class='"+(x.ok?"good":"bad")+"'><div class='rvl'><span class='mk'>"+(x.ok?"✓":"✗")+"</span><b>"+esc(x.t)+" = "+x.a+"</b>";
   if(!x.ok)h+="<span class='you'>You said: "+(x.u===null?"no answer":esc(x.u))+"</span>";
@@ -206,7 +234,15 @@ var TRICKS=[
 "Squares ending in 5: multiply the first digit by the next number up, then write 25. 35²: 3 × 4 = 12, so 1225.",
 "Adding 9: add 10, then take away 1. 36 + 9 = 46 − 1 = 45.",
 "Times 6 with an even digit: the answer ends in that digit and starts with half of it. 6 × 8 = 48.",
-"Percentages: find 10% by dividing by 10. For 5%, halve that. 5% of 80 = 8 ÷ 2 = 4."];
+"Percentages: find 10% by dividing by 10. For 5%, halve that. 5% of 80 = 8 ÷ 2 = 4.",
+"Times 12: do times 10, then add times 2. 12 × 7 = 70 + 14 = 84.",
+"Subtracting 9: take away 10, then add 1. 52 − 9 = 42 + 1 = 43.",
+"Make 100: the tens add to 9 and the ones add to 10. 100 − 37 = 63 (3 + 6 = 9, 7 + 3 = 10).",
+"Times 3: double it, then add one more lot. 3 × 14 = 28 + 14 = 42.",
+"Divisible by 3? Add the digits. If that total is in the 3 table, so is the number. 123: 1 + 2 + 3 = 6, yes!",
+"Times 8: double, double, double. 8 × 6 = 12, 24, 48.",
+"Doubling big numbers: double the tens, double the ones, then add. Double 47 = 80 + 14 = 94.",
+"Percent flip: 8% of 50 is the same as 50% of 8, which is 4. Swap them to make it easier."];
 var ti=Math.floor(Date.now()/864e5)%TRICKS.length;
 function mastered(){var c=0;for(var k in S.facts){if(k.charAt(0)!=="x")continue;var f=S.facts[k];if(f.n&&f.c/f.n>=.8&&f.c>=3&&f.t<2500)c++}return c}
 var BADGES=[
@@ -217,12 +253,20 @@ var BADGES=[
 ["Sharp Shooter","90% accuracy, 50+ questions",function(){return S.stats.asked>=50&&S.stats.right/S.stats.asked>=.9}],
 ["Coin Collector","Earn 300 coins",function(){return S.coins>=300}],
 ["Fast Fingers","Master 10 table facts",function(){return mastered()>=10}],
-["Table Master","Master 40 table facts",function(){return mastered()>=40}]];
+["Table Master","Master 40 table facts",function(){return mastered()>=40}],
+["Daily Habit","Play 3 days in a row",function(){return (S.stats.bestDs||0)>=3}],
+["Goal Getter","Reach your daily goal",function(){return (S.stats.goals||0)>=1}],
+["Hint-Free Hero","Practice 12+ questions, 90%+, no hints",function(){return (S.stats.nh||0)>=1}],
+["Explorer","Try 6 different challenges",function(){return Object.keys(S.tried||{}).length>=6}],
+["Mistake Fixer","Redo your mistakes with no errors",function(){return (S.stats.fixed||0)>=1}]];
 function earned(){return BADGES.filter(function(b){return b[2]()}).map(function(b){return b[0]})}
 function renderProgress(){
   var st=S.stats,acc=st.asked?Math.round(st.right/st.asked*100)+"%":"–";
   $("stats").innerHTML=[["Games",st.games],["Questions",st.asked],["Accuracy",acc],["Best streak",st.bestStreak]].map(function(x){return "<div><b>"+x[1]+"</b><span>"+x[0]+"</span></div>"}).join("");
   $("trick").textContent=TRICKS[ti%TRICKS.length];
+  var tf=[];for(var k in S.facts){var f=S.facts[k];if(k.charAt(0)==="x"&&f.n>=2&&f.c/f.n<.8)tf.push([k,f.c/f.n])}tf.sort(function(x,y){return x[1]-y[1]});
+  $("tricky").innerHTML=tf.length?tf.slice(0,8).map(function(x){var p=x[0].split("x");return "<li>"+p[1]+" × "+p[2]+" <small>"+Math.round(x[1]*100)+"%</small></li>"}).join(""):"<li>None yet. Play a few rounds and your tricky facts show up here.</li>";
+  $("trainBtn").classList.toggle("hidden",!tf.length);
   var e=earned();$("badgeCount").textContent="("+e.length+"/"+BADGES.length+")";
   $("badges").innerHTML=BADGES.map(function(b){var on=e.indexOf(b[0])>-1;return "<div class='badge"+(on?" on":"")+"'><b>"+(on?"🏅 ":"🔒 ")+b[0]+"</b><small>"+b[1]+"</small></div>"}).join("")}
 $("trickBtn").onclick=function(){ti++;$("trick").textContent=TRICKS[ti%TRICKS.length]};
@@ -239,6 +283,8 @@ function press(d){
   b.setAttribute("aria-label",d==="back"?"Delete":(d==="go"?"Submit":d));
   b.onclick=function(){press(d)};$("pad").appendChild(b)});
 document.addEventListener("keydown",function(e){
+  if(e.key==="Enter"&&G&&!$("game").classList.contains("hidden"))e.preventDefault();
+  if((e.key==="h"||e.key==="H")&&G&&!$("game").classList.contains("hidden")){hintClick();return}
   if(e.key>="0"&&e.key<="9")press(e.key);
   else if(e.key==="Backspace")press("back");
   else if(e.key==="Enter"){if(G&&!$("game").classList.contains("hidden"))press("go");else if(!$("home").classList.contains("hidden")&&document.activeElement===document.body)start("gig")}});
@@ -247,6 +293,12 @@ $("all").onclick=function(){S.sel=[];for(var i=2;i<=S.max;i++)S.sel.push(i);save
 $("hintBtn").onclick=hintClick;$("nextBtn").onclick=goNext;
 $("finishBtn").onclick=function(){if(G&&G.mode==="practice")finish()};
 $("focus").onclick=function(){S.focus=!S.focus;save();renderHome()};
+$("retry").onclick=function(){start("practice",RETRY.slice())};
+$("trainBtn").onclick=function(){S.ch="times";S.focus=true;save();start("practice")};
+function applyTheme(){if(S.theme)document.documentElement.setAttribute("data-theme",S.theme)}
+$("theme").onclick=function(){var dark=document.documentElement.getAttribute("data-theme")==="dark"||(!S.theme&&!matchMedia("(prefers-color-scheme:light)").matches);S.theme=dark?"light":"dark";applyTheme();save()};
+$("snd").onclick=function(){S.snd=S.snd===false;save();$("snd").textContent=S.snd===false?"🔇":"🔊"};
+applyTheme();$("snd").textContent=S.snd===false?"🔇":"🔊";
 $("gig").onclick=function(){start("gig")};
 $("practice").onclick=function(){start("practice")};
 $("quit").onclick=function(){clearInterval(timer);G=null;renderHome();show("home")};
