@@ -11,70 +11,94 @@
 <main>
 <section id="home">
   <header>
-    <h1>Mathlete</h1>
+    <div><h1>Mathlete</h1><p class="tag">Train your brain, beat the clock, climb the ranks.</p></div>
     <div class="stat"><span>Coins</span><b id="coins">0</b></div>
   </header>
-  <details class="how" id="how" open>
-    <summary>How to play</summary>
-    <ol>
-      <li>Choose a challenge below.</li>
-      <li>At the bottom, pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
-      <li>Type each answer. It checks itself, so you don’t need to press Enter.</li>
-      <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer.</li>
-    </ol>
-  </details>
   <div class="rank"><b id="rankName" class="big" style="font-size:1.2rem"></b><span id="rankNext" style="color:var(--mid)"></span></div>
   <div class="bar"><i id="rankBar"></i></div>
 
-  <div id="tablesBox">
-    <h2>Pick your tables</h2>
-    <p class="hint">A “times table” is the list for one number. The 5 table is 5 × 1, 5 × 2, 5 × 3 and so on. Tap a level to start, or choose your own numbers.</p>
-    <div class="cards" id="levels"></div>
-    <details class="more" id="more">
-    <summary>Custom: pick your own numbers (tap to open)</summary>
-    <div class="maxrow"><label for="max">Highest number</label><input id="max" type="number" min="2" max="50" inputmode="numeric"><button class="chip" id="all" aria-label="Select all tables">All</button></div>
-    <div class="chips" id="chips"></div>
+  <div class="layout">
+  <div class="col-main">
+    <details class="how" id="how" open>
+      <summary>How to play</summary>
+      <ol>
+        <li>Choose a challenge below.</li>
+        <li>Pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
+        <li>Type each answer. It checks itself, so you don’t need to press Enter.</li>
+        <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer.</li>
+        <li>After every round you see which answers were right or wrong, and why.</li>
+      </ol>
     </details>
+
+    <div id="tablesBox">
+      <h2>Pick your tables</h2>
+      <p class="hint">A “times table” is the list for one number. The 5 table is 5 × 1, 5 × 2, 5 × 3 and so on. Choose a level, or pick your own numbers.</p>
+      <div class="cards" id="levels"></div>
+      <details class="more" id="more">
+      <summary>Custom: pick your own numbers (click to open)</summary>
+      <div class="maxrow"><label for="max">Highest number</label><input id="max" type="number" min="2" max="50" inputmode="numeric"><button class="chip" id="all" aria-label="Select all tables">All</button></div>
+      <div class="chips" id="chips"></div>
+      </details>
+    </div>
+
+    <h2>Choose a challenge</h2>
+    <p class="hint">Pick a challenge, then press Play.</p>
+    <div class="cards" id="cards"></div>
+
+    <h2>Learn the times tables</h2>
+    <p class="hint">Pick a number to see its whole table. Read it out loud, then cover it up and try to say it from memory.</p>
+    <div class="chips" id="learnChips"></div>
+    <p class="tip" id="learnTip"></p>
+    <div class="tlist" id="learnList"></div>
+    <details class="more"><summary>Show the full 12 × 12 chart (click to open)</summary><div class="grid chart" id="learnChart"></div></details>
+
+    <h2>Your progress</h2>
+    <div class="dash">
+      <div class="panel"><h3>Stats</h3><div class="stats" id="stats"></div></div>
+      <div class="panel"><h3>Math trick</h3><p id="trick" class="trick"></p><button class="quit" id="trickBtn">Another trick</button></div>
+    </div>
+    <div class="panel"><h3>Badges <span id="badgeCount"></span></h3><div class="badges" id="badges"></div></div>
+
+    <h2>Times tables set list (2 to 12)</h2>
+    <div class="grid" id="grid"></div>
+    <div class="legend"><span>New</span><span class="l">Tricky</span><span class="m">Getting there</span><span class="f">Fast</span></div>
   </div>
 
-  <h2>Choose a challenge</h2>
-  <p class="hint">Tap a challenge, then press Play at the bottom of the screen.</p>
-  <div class="cards" id="cards"></div>
-
-
-  <h2>Times tables set list (2 to 12)</h2>
-  <div class="grid" id="grid"></div>
-  <div class="legend"><span>New</span><span class="l">Tricky</span><span class="m">Getting there</span><span class="f">Fast</span></div>
-
-  <div class="playbar">
-    <div class="in">
-      <div class="now">Ready: <b id="playName"></b><span class="desk"> · Press Enter to play</span></div>
-      <div class="lenwrap"><span class="lbl">Blitz length:</span><div class="len" id="len"></div></div>
-      <div class="btns">
-        <button class="mode" id="gig"><b>Play Blitz</b><span id="gigSub">60 seconds, earn coins</span></button>
-        <button class="mode alt" id="practice"><b>Practice</b>No timer</button>
+  <aside class="col-side">
+    <div class="playbar">
+      <div class="in">
+        <div class="now">Ready: <b id="playName"></b><span class="desk"> · Press Enter to play</span></div>
+        <div class="lenwrap"><span class="lbl">Blitz length:</span><div class="len" id="len"></div></div>
+        <div class="btns">
+          <button class="mode" id="gig"><b>Play Blitz</b><span id="gigSub">60 seconds, earn coins</span></button>
+          <button class="mode alt" id="practice"><b>Practice</b>No timer</button>
+        </div>
       </div>
     </div>
+  </aside>
   </div>
 </section>
 
 <section id="game" class="hidden">
-  <div class="top"><button class="quit" id="quit">Quit</button><b id="status"></b><b id="clock" class="big"></b></div>
+  <div class="top"><button class="quit" id="quit">Quit</button><b id="status"></b><b id="streak" class="streak"></b><b id="clock" class="big"></b></div>
   <div class="bar qbar"><i id="qbar"></i></div>
-  <div class="q big" id="q"></div>
-  <div class="ans" id="ans" aria-live="polite"></div>
-  <div class="pad" id="pad"></div>
+  <div class="gamegrid">
+    <div><div class="q big" id="q"></div>
+    <div class="ans" id="ans" aria-live="polite"></div></div>
+    <div class="pad" id="pad"></div>
+  </div>
 </section>
 
 <section id="end" class="hidden">
   <h2 style="text-align:center;margin-top:30px" id="endTitle"></h2>
   <div class="score big" id="endScore"></div>
   <p class="sum" id="endSum"></p>
-  <div id="endFix"></div>
+  <p class="sum newbadge" id="endBadge"></p>
   <div class="modes">
     <button class="mode" id="again"><b>Play again</b>Same challenge</button>
     <button class="mode alt" id="home2"><b>Home</b>Change challenge</button>
   </div>
+  <div id="endFix"></div>
 </section>
 </main>
 
