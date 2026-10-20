@@ -30,7 +30,7 @@ var S={coins:0,sel:[2,5,10],max:12,len:60,plen:12,focus:false,ch:"times",grade:"
 try{var raw=localStorage.getItem("mathescent");if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
 function save(){try{localStorage.setItem("mathescent",JSON.stringify(S))}catch(e){}}
 var $=function(id){return document.getElementById(id)};
-function show(id){["home","game","end"].forEach(function(x){$(x).classList.toggle("hidden",x!==id)});window.scrollTo(0,0)}
+function show(id){["home","game","end"].forEach(function(x){$(x).classList.toggle("hidden",x!==id)});document.body.classList.toggle("playing",id==="game");window.scrollTo(0,0)}
 function cur(){return CH.filter(function(c){return c.id===S.ch})[0]||CH[0]}
 function r(a,b){return a+Math.floor(Math.random()*(b-a+1))}
 function tb(){return S.sel[r(0,S.sel.length-1)]}
@@ -55,7 +55,13 @@ function gen(id){
   if(id==="frac"){m=[["½",2],["¼",4],["⅓",3]][r(0,2)];b=m[1]*r(2,12);return{t:m[0]+" of "+b,a:b/m[1],e:m[0]+" means split "+b+" into "+m[1]+" equal parts. "+b+" ÷ "+m[1]+" = "+b/m[1]+"."}}
 }
 function score(q){if(!q.k)return .5;var f=S.facts[q.k];return f&&f.n?f.c/f.n-(f.t>2500?.2:0):-1}
-var G=null,timer=null,RETRY=[],GOAL=30,ac=null;
+var G=null,timer=null,RETRY=[],GOAL=30,ac=null,wl=null;
+function buzz(n){try{if(S.snd!==false&&navigator.vibrate)navigator.vibrate(n)}catch(e){}}
+function lockScreen(){try{if(navigator.wakeLock&&!wl)navigator.wakeLock.request("screen").then(function(s){wl=s;s.addEventListener("release",function(){wl=null})}).catch(function(){})}catch(e){}}
+function unlockScreen(){try{if(wl){wl.release();wl=null}}catch(e){}}
+document.addEventListener("visibilitychange",function(){if(!document.hidden&&G&&!G.lock)lockScreen()});
+function fitBar(){var pb=$("playbar"),m=document.querySelector("main");if(!pb||!m)return;m.style.paddingBottom=window.innerWidth<900?(pb.offsetHeight+28)+"px":""}
+function syncOpt(){var b=$("optBtn");if(b)b.textContent="⚙ Options · Blitz "+lenName().replace(" seconds","s").replace(" minutes"," min")+" · Practice "+(S.plen||"∞")+(S.focus?" · Focus on":"");fitBar()}
 function day(){return Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5)}
 function beep(f){if(S.snd===false)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.12)}catch(e){}}
 function pick(){
@@ -173,10 +179,10 @@ function renderHome(){
       if(f&&f.n>0){var acc=f.c/f.n;cl=(acc>=.8&&f.c>=3&&f.t<2500)?"f":(acc>=.6?"m":"l")}
       h+='<td class="'+cl+'" title="'+a+' × '+b2+'"></td>'}
     h+="</tr>"}
-  $("grid").innerHTML=h+"</table>";renderLearn();renderProgress()}
+  $("grid").innerHTML=h+"</table>";renderLearn();renderProgress();syncOpt()}
 
 function start(mode,queue){
-  S.seen=1;S.tried=S.tried||{};S.tried[S.ch]=1;save();
+  S.seen=1;S.tried=S.tried||{};S.tried[S.ch]=1;save();lockScreen();
   var _lim=cur().lim*1000;if(S.grade==="hs")_lim=Math.round(_lim*0.85);if(S.grade==="college")_lim=Math.round(_lim*0.7);
   G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:queue?queue.length:S.plen,queue:queue||null,lim:_lim,len:S.len*1000,times:[],paceTarget:_lim};
   show("game");$("streak").textContent="";$("status").textContent=(mode==="gig"?"Blitz: ":"Practice: ")+cur().n;
@@ -200,7 +206,7 @@ function answer(timedOut){
   G.asked++;if(ok){G.streak++;if(G.streak>G.maxStreak)G.maxStreak=G.streak}else G.streak=0;$("streak").textContent=G.streak>1?"🔥 "+G.streak:"";G.log.push({t:q.t,a:q.a,u:(timedOut||G.input==="")?null:G.input,ok:ok,e:q.e||"",q:q,ms:ms});
   if(!timedOut){G.times.push(ms);updatePace();}
   if(q.k){var f=S.facts[q.k]||(S.facts[q.k]={c:0,n:0,t:3000});f.n++;if(ok){f.c++;f.t=Math.round(f.t*.6+Math.min(ms,6000)*.4)}}
-  G.lock=true;beep(ok?660:220);
+  G.lock=true;beep(ok?660:220);if(!ok)buzz(90);
   if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;if(G.mode==="gig"&&G.streak%5===0){G.coins+=3;$("streak").textContent+=" +3🪙"}if(G.mode==="practice")coachSay(true,q,ms);after()}
   else{$("ans").textContent=q.a;$("ans").classList.add("no");
     if(G.mode==="practice"){coachSay(false,q,ms);G.wait=true;$("nextBtn").classList.remove("hidden");$("hintBtn").classList.add("hidden")}
@@ -211,7 +217,7 @@ function after(){
   if(G.mode==="gig"&&Date.now()-G.t0>=G.len)return finish();
   next()}
 function finish(){
-  clearInterval(timer);var g=G,was=earned();g.lock=true;S.coins+=g.coins;S.stats.games++;S.stats.asked+=g.asked;S.stats.right+=g.score;S.stats.bestStreak=Math.max(S.stats.bestStreak,g.maxStreak);
+  clearInterval(timer);unlockScreen();var g=G,was=earned();g.lock=true;S.coins+=g.coins;S.stats.games++;S.stats.asked+=g.asked;S.stats.right+=g.score;S.stats.bestStreak=Math.max(S.stats.bestStreak,g.maxStreak);
   var d=day(),pre;if(S.last!==d){S.ds=S.last===d-1?(S.ds||0)+1:1;S.last=d}S.stats.bestDs=Math.max(S.stats.bestDs||0,S.ds);
   if(!S.td||S.td.d!==d)S.td={d:d,n:0};pre=S.td.n;S.td.n+=g.score;
   if(pre<GOAL&&S.td.n>=GOAL){S.coins+=20;S.stats.goals=(S.stats.goals||0)+1;g.goal=1}
@@ -297,7 +303,7 @@ function press(d){
   if(!G||G.lock||$("game").classList.contains("hidden"))return;
   if(d==="back")G.input=G.input.slice(0,-1);
   else if(d==="go"){if(G.input)answer(false);return}
-  else if(G.input.length<4)G.input+=d;
+  else if(G.input.length<4){G.input+=d;buzz(8)}
   $("ans").textContent=G.input;
   if(G.input.length===String(G.q.a).length)answer(false)}
 ["1","2","3","4","5","6","7","8","9","back","0","go"].forEach(function(d){
@@ -370,13 +376,13 @@ $("finishBtn").onclick=function(){if(G&&G.mode==="practice")finish()};
 $("focus").onclick=function(){S.focus=!S.focus;save();renderHome()};
 $("retry").onclick=function(){start("practice",RETRY.slice())};
 $("trainBtn").onclick=function(){S.ch="times";S.focus=true;save();start("practice")};
-function applyTheme(){if(S.theme)document.documentElement.setAttribute("data-theme",S.theme)}
+function applyTheme(){if(S.theme)document.documentElement.setAttribute("data-theme",S.theme);var m=$("tc");if(m)m.setAttribute("content",getComputedStyle(document.body).backgroundColor)}
 $("theme").onclick=function(){var dark=document.documentElement.getAttribute("data-theme")==="dark"||(!S.theme&&!matchMedia("(prefers-color-scheme:light)").matches);S.theme=dark?"light":"dark";applyTheme();save()};
 $("snd").onclick=function(){S.snd=S.snd===false;save();$("snd").textContent=S.snd===false?"🔇":"🔊"};
 applyTheme();$("snd").textContent=S.snd===false?"🔇":"🔊";
 $("gig").onclick=function(){start("gig")};
 $("practice").onclick=function(){start("practice")};
-$("quit").onclick=function(){clearInterval(timer);G=null;renderHome();show("home")};
+$("quit").onclick=function(){clearInterval(timer);unlockScreen();G=null;renderHome();show("home")};
 
 $("restart").onclick=function(){restartRun()};
 $("again").onclick=function(){start(G.mode)};
@@ -418,6 +424,11 @@ function renderEndResults(g){
 
 
 
+$("optBtn").onclick=function(){var pb=$("playbar"),o=pb.classList.toggle("open");this.setAttribute("aria-expanded",o);fitBar()};
+if(window.ResizeObserver)new ResizeObserver(fitBar).observe($("playbar"));
+window.addEventListener("resize",fitBar);
+$("max").addEventListener("focus",function(){document.body.classList.add("typing")});
+$("max").addEventListener("blur",function(){document.body.classList.remove("typing")});
 renderHome();
 if(S.seen)$("how").removeAttribute("open");
 })();

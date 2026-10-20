@@ -3,6 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" id="tc" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mathescent">
 <title>Mathescent – Number Challenges for Students</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
 <link rel="stylesheet" href="style.css">
@@ -26,11 +30,11 @@
       <ol>
         <li>Choose your <b>grade</b> (Grade 1–6, High School, or College) and a challenge below.</li>
         <li>Pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
-        <li>Type each answer. It checks itself, so you don’t need to press Enter.</li>
+        <li>Type each answer on your keyboard, or <b>tap the number pad</b> on a phone or tablet. It checks itself, so you don’t need to press Enter or Go.</li>
         <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer, lets you choose 12, 30, 50 or unlimited questions, and a coach gives hints and explains mistakes.</li>
         <li><b>Hints (Practice only):</b> tap 💡 up to 3 times. Hint 1 is a nudge, hint 2 is a closer clue, hint 3 shows the full steps. On a computer press <b>H</b>. Blitz has no hints, so practise first.</li>
         <li>After every round you see which answers were right or wrong, why, and your <b>pace</b> (speed vs target).</li>
-        <li><b>Speedrun restart:</b> press <b>R</b> or <b>Ctrl+R</b> (or the ↻ Restart button) to instantly restart the same challenge. Works during a run and on the results screen.</li>
+        <li><b>Speedrun restart:</b> press <b>R</b> or <b>Ctrl+R</b> on a computer, or tap the <b>↻ Restart</b> button on a phone to instantly restart the same challenge. Works during a run and on the results screen.</li>
       </ol>
     </details>
 
@@ -76,12 +80,15 @@
   </div>
 
   <aside class="col-side">
-    <div class="playbar">
+    <div class="playbar" id="playbar">
       <div class="in">
         <div class="now">Ready: <b id="playName"></b><span class="desk"> · Press Enter to play</span></div>
+        <button class="optbtn" id="optBtn" aria-expanded="false" aria-controls="opts">⚙ Options</button>
+        <div class="opts" id="opts">
         <div class="lenwrap"><span class="lbl">Blitz length:</span><div class="len" id="len"></div></div>
         <div class="lenwrap"><span class="lbl">Practice length:</span><div class="len" id="plen"></div></div>
         <div class="lenwrap"><button class="focus" id="focus" aria-pressed="false">🎯 Smart focus: more of my tricky facts</button></div>
+        </div>
         <div class="btns">
           <button class="mode" id="gig"><b>Play Blitz</b><span id="gigSub">60 seconds, earn coins</span></button>
           <button class="mode alt" id="practice"><b>Practice</b><span id="pracSub">12 questions, with coach</span></button>
