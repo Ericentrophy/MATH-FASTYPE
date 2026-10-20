@@ -14,6 +14,7 @@ var CH=[
 {id:"rnd",n:"Rounding",d:"Round 47 to the nearest 10",lim:6},
 {id:"ord",n:"Order of operations",d:"2 + 3 × 4",lim:6},
 {id:"frac",n:"Fractions of numbers",d:"¼ of 36",lim:5},
+{id:"word",n:"Word problems",d:"Real-life stories",lim:14},
 {id:"mix",n:"Mixed mayhem",d:"A bit of everything",lim:6,tab:1}];
 var GRADES=[
 {id:"g1",n:"Grade 1",d:"Counting · simple add & subtract",sel:[2,5,10],max:10,chs:["add","sub","dbl","bond"]},
@@ -26,6 +27,7 @@ var GRADES=[
 {id:"college",n:"College",d:"Expert pace · full challenge set",sel:[2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],max:20,chs:["times","div","miss","add","sub","sq","root","pct","dbl","bond","rnd","ord","frac","mix"]},
 {id:"custom",n:"Custom",d:"Your own tables & challenges",sel:null,max:null,chs:null}
 ];
+GRADES.forEach(function(g){if(g.chs&&g.id!=="g1"&&g.chs.indexOf("word")<0)g.chs.push("word")});
 var S={coins:0,sel:[2,5,10],max:12,len:60,plen:12,focus:false,ch:"times",grade:"g3",facts:{},best:{},stats:{games:0,asked:0,right:0,bestStreak:0}};
 try{var raw=localStorage.getItem("mathescent");if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
 function save(){try{localStorage.setItem("mathescent",JSON.stringify(S))}catch(e){}}
@@ -39,7 +41,7 @@ function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;")}
 function xk(a,b){return "x"+Math.min(a,b)+"x"+Math.max(a,b)}
 function gen(id){
   var a,b,n,m;
-  if(id==="mix"){var o=CH.filter(function(c){return c.id!=="mix"});return gen(o[r(0,o.length-1)].id)}
+  if(id==="mix"){var o=CH.filter(function(c){return c.id!=="mix"&&c.id!=="word"});return gen(o[r(0,o.length-1)].id)}
   if(id==="times"){a=tb();b=r(2,S.max);if(Math.random()<.5){n=a;a=b;b=n}var s=Math.min(a,b),l=Math.max(a,b);return{t:a+" × "+b,a:a*b,k:xk(a,b),e:a+" × "+b+" means "+s+" groups of "+l+(s<=6?": "+rp(l,s)+" = "+a*b:" = "+a*b)+"."}}
   if(id==="div"){a=tb();b=r(2,S.max);return{t:(a*b)+" ÷ "+a,a:b,k:"d"+a+"x"+b,e:(a*b)+" ÷ "+a+" asks how many "+a+"s fit into "+a*b+". Because "+a+" × "+b+" = "+a*b+", the answer is "+b+"."}}
   if(id==="miss"){a=tb();b=r(2,S.max);m=a+" × "+b+" = "+a*b;n="Use the fact "+m+". The missing number is "+b+".";return Math.random()<.5?{t:"? × "+a+" = "+a*b,a:b,k:xk(a,b),e:n}:{t:a+" × ? = "+a*b,a:b,k:xk(a,b),e:n}}
@@ -53,6 +55,19 @@ function gen(id){
   if(id==="rnd"){b=r(0,1)?10:100;n=r(11,b===10?98:980);if(n%b===b/2)n++;a=Math.round(n/b)*b;return{t:"Round "+n+" to the nearest "+b,a:a,e:n+" is between "+Math.floor(n/b)*b+" and "+(Math.floor(n/b)*b+b)+". It is closer to "+a+"."}}
   if(id==="ord"){a=r(2,9);b=r(2,9);n=r(2,9);return{t:a+" + "+b+" × "+n,a:a+b*n,e:"Multiply first: "+b+" × "+n+" = "+b*n+". Then add "+a+" to get "+(a+b*n)+"."}}
   if(id==="frac"){m=[["½",2],["¼",4],["⅓",3]][r(0,2)];b=m[1]*r(2,12);return{t:m[0]+" of "+b,a:b/m[1],e:m[0]+" means split "+b+" into "+m[1]+" equal parts. "+b+" ÷ "+m[1]+" = "+b/m[1]+"."}}
+  if(id==="word"){
+    var NM=["Maria","Juan","Ana","Carlo","Liza","Ben","Sofia","Miguel"],nm=NM[r(0,7)],nm2=NM[r(0,7)],k=r(0,9),c;
+    while(nm2===nm)nm2=NM[r(0,7)];
+    if(k===0){a=r(12,60);b=r(8,40);return{t:nm+" has "+a+" pencils and buys "+b+" more. How many pencils does "+nm+" have now?",a:a+b,e:"“Buys more” means add: "+a+" + "+b+" = "+(a+b)+".",h:["Does the total get bigger or smaller? That tells you whether to add or subtract.","Add the two amounts: "+a+" + "+b+"."]}}
+    if(k===1){a=r(6,12);b=r(3,9);return{t:"A tray holds "+a+" eggs. How many eggs are in "+b+" trays?",a:a*b,e:b+" trays of "+a+" eggs is "+b+" × "+a+" = "+a*b+".",h:["Equal groups means multiply.","Do "+b+" × "+a+"."]}}
+    if(k===2){a=r(30,90);b=r(5,a-10);return{t:nm+" had "+a+" stickers and gave "+b+" to "+nm2+". How many stickers are left?",a:a-b,e:"“Gave away” means subtract: "+a+" − "+b+" = "+(a-b)+".",h:["Giving away makes the amount smaller, so subtract.","Count up from "+b+" to "+a+" to find the difference."]}}
+    if(k===3){b=r(3,8);c=r(3,12);return{t:nm+" shares "+b*c+" sweets equally among "+b+" friends. How many sweets does each friend get?",a:c,e:"Sharing equally means divide: "+b*c+" ÷ "+b+" = "+c+", because "+b+" × "+c+" = "+b*c+".",h:["Sharing equally means divide.","Ask: "+b+" × ? = "+b*c+"."]}}
+    if(k===4){a=r(3,15);b=r(3,9);return{t:"A notebook costs ₱"+a+". How many pesos do "+b+" notebooks cost?",a:a*b,e:b+" notebooks at ₱"+a+" each: "+b+" × "+a+" = "+a*b+" pesos.",h:["The price is the same each time, so multiply.","Do "+b+" × "+a+"."]}}
+    if(k===5){a=r(12,95);return{t:nm+" pays ₱100 for a snack that costs ₱"+a+". How many pesos change does "+nm+" get back?",a:100-a,e:"Change is what is left: 100 − "+a+" = "+(100-a)+". You can also count up from "+a+" to 100.",h:["Change means the amount left after paying.","Count up from "+a+" to 100."]}}
+    if(k===6){a=r(3,15);return{t:"A square garden has sides of "+a+" m. What is the distance around it (its perimeter) in metres?",a:a*4,e:"A square has 4 equal sides: 4 × "+a+" = "+a*4+" m.",h:["Perimeter is the total of all the sides.","A square has 4 equal sides: "+a+" + "+a+" + "+a+" + "+a+"."]}}
+    if(k===7){a=r(3,15);b=r(3,12);return{t:"A rectangle is "+a+" cm long and "+b+" cm wide. What is its area in cm²?",a:a*b,e:"Area of a rectangle = length × width: "+a+" × "+b+" = "+a*b+" cm².",h:["Area is the space inside: length × width.","Do "+a+" × "+b+"."]}}
+    if(k===8){a=r(2,5);return{t:"A movie lasts "+a+" hours. How many minutes is that?",a:a*60,e:"1 hour is 60 minutes, so "+a+" × 60 = "+a*60+" minutes.",h:["How many minutes are in 1 hour?","Do "+a+" × 6 first, then add a zero."]}}
+    a=r(30,60);b=r(10,a-5);return{t:"A bus has "+a+" seats and "+b+" are taken. How many seats are still free?",a:a-b,e:"Free seats = all seats − taken seats: "+a+" − "+b+" = "+(a-b)+".",h:["Free means not taken, so subtract.","Do "+a+" − "+b+"."]}}
 }
 function score(q){if(!q.k)return .5;var f=S.facts[q.k];return f&&f.n?f.c/f.n-(f.t>2500?.2:0):-1}
 var G=null,timer=null,RETRY=[],GOAL=30,ac=null,wl=null;
@@ -64,8 +79,13 @@ function fitBar(){var pb=$("playbar"),m=document.querySelector("main");if(!pb||!
 function syncOpt(){var b=$("optBtn");if(b)b.textContent="⚙ Options · Blitz "+lenName().replace(" seconds","s").replace(" minutes"," min")+" · Practice "+(S.plen||"∞")+(S.focus?" · Focus on":"");fitBar()}
 function day(){return Math.floor((Date.now()-new Date().getTimezoneOffset()*6e4)/864e5)}
 function beep(f){if(S.snd===false)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f;g.gain.value=.05;o.connect(g);g.connect(ac.destination);o.start();o.stop(ac.currentTime+.12)}catch(e){}}
+var _mr=Math.random,SEEDBAK=null;
+function seedOn(s){var a=s>>>0;Math.random=function(){a=(a+0x6D2B79F5)|0;var t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}}
+function seedOff(){Math.random=_mr}
+function endSeed(){if(SEEDBAK){S.ch=SEEDBAK.ch;S.sel=SEEDBAK.sel;S.max=SEEDBAK.max;S.len=SEEDBAK.len;SEEDBAK=null}seedOff()}
 function pick(){
   if(G.queue&&G.queue.length){var rq=G.queue.shift();G.last=rq.t;return rq}
+  if(G.opt){var sq=gen(S.ch);G.last=sq.t;return sq}
   var best=null;
   for(var i=0;i<(S.focus&&G.mode==="practice"?10:4);i++){var q=gen(S.ch);if(G.last&&q.t===G.last)continue;if(!best||score(q)<score(best))best=q}
   if(!best)best=gen(S.ch);G.last=best.t;return best}
@@ -76,6 +96,7 @@ var LENS=[[30,"30s","30 seconds"],[60,"60s","60 seconds"],[90,"90s","90 seconds"
 var PLENS=[[12,"12"],[30,"30"],[50,"50"],[0,"∞"]];
 function plenName(){return S.plen?S.plen+" questions":"Unlimited questions"}
 function hints(q){
+  if(q.h)return q.h;
   var t=q.t,a=q.a,m,s,l,n,b,T=function(v){return v-v%10},mul=function(k,c){var o=[];for(var i=1;i<=c;i++)o.push(k*i);return o.join(", ")};
   if(m=t.match(/^\? × (\d+) = (\d+)$/)||t.match(/^(\d+) × \? = (\d+)$/))return["Flip it into a division: "+m[2]+" ÷ "+m[1]+" = ?","Count by "+m[1]+"s: "+mul(+m[1],4)+"… How many jumps to reach "+m[2]+"?"];
   if(m=t.match(/^(\d+) \+ \? = 100$/)){n=T(+m[1])+10;return["How far is "+m[1]+" from 100? Jump to the next ten first.","From "+m[1]+" to "+n+" is "+(n-m[1])+". From "+n+" to 100 is "+(100-n)+". Add the two jumps."]}
@@ -181,18 +202,20 @@ function renderHome(){
     h+="</tr>"}
   $("grid").innerHTML=h+"</table>";renderLearn();renderProgress();syncOpt()}
 
-function start(mode,queue){
-  S.seen=1;S.tried=S.tried||{};S.tried[S.ch]=1;save();lockScreen();
-  var _lim=cur().lim*1000;if(S.grade==="hs")_lim=Math.round(_lim*0.85);if(S.grade==="college")_lim=Math.round(_lim*0.7);
-  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:queue?queue.length:S.plen,queue:queue||null,lim:_lim,len:S.len*1000,times:[],paceTarget:_lim};
-  show("game");$("streak").textContent="";$("status").textContent=(mode==="gig"?"Blitz: ":"Practice: ")+cur().n;
+function start(mode,queue,opt){
+  endSeed();
+  if(opt){SEEDBAK={ch:S.ch,sel:S.sel,max:S.max,len:S.len};S.ch=opt.ch;S.sel=opt.sel.slice();S.max=opt.max;S.len=opt.len;seedOn(opt.seed)}
+  S.seen=1;S.tried=S.tried||{};S.tried[S.ch]=1;if(!opt)save();lockScreen();
+  var _lim=cur().lim*1000;if(!opt&&S.grade==="hs")_lim=Math.round(_lim*0.85);if(!opt&&S.grade==="college")_lim=Math.round(_lim*0.7);
+  G={mode:mode,score:0,coins:0,asked:0,wrong:{},log:[],streak:0,maxStreak:0,t0:Date.now(),qStart:0,input:"",lock:false,wait:false,hl:0,hused:0,plen:queue?queue.length:S.plen,queue:queue||null,lim:_lim,len:S.len*1000,times:[],paceTarget:_lim,opt:opt||null};
+  show("game");$("streak").textContent="";$("status").textContent=(opt&&opt.label?opt.label+" · ":"")+(mode==="gig"?"Blitz: ":"Practice: ")+cur().n;
   $("qbar").parentNode.classList.toggle("hidden",mode!=="gig");
   $("coachBox").className=mode==="practice"?"coach":"coach hidden";$("finishBtn").classList.toggle("hidden",mode!=="practice");
   $("coach").textContent="I’m your coach. Stuck? Tap 💡 (or press H) for up to 3 hints: a nudge, a closer clue, then the full steps. I’ll explain every mistake.";
   next();clearInterval(timer);timer=setInterval(tick,50)}
 function next(){
   var q=pick();G.q=q;G.input="";G.lock=false;G.qStart=Date.now();
-  $("q").textContent=q.t;$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%";G.hl=0;G.wait=false;$("nextBtn").classList.add("hidden");$("hintBtn").classList.remove("hidden");hintBtn();if(G.times&&G.times.length)updatePace();else{var pb=$("paceBar"),pv=$("paceVal");if(pb){pb.style.width="50%";pb.className="";}if(pv)pv.textContent="—";}}
+  $("q").textContent=q.t;$("q").classList.toggle("long",q.t.length>32);$("ans").textContent="";$("ans").className="ans";$("qbar").style.width="100%";G.hl=0;G.wait=false;$("nextBtn").classList.add("hidden");$("hintBtn").classList.remove("hidden");hintBtn();if(G.times&&G.times.length)updatePace();else{var pb=$("paceBar"),pv=$("paceVal");if(pb){pb.style.width="50%";pb.className="";}if(pv)pv.textContent="—";}}
 function tick(){
   if(!G)return;var now=Date.now();
   if(G.mode==="gig"){
@@ -223,7 +246,9 @@ function finish(){
   if(pre<GOAL&&S.td.n>=GOAL){S.coins+=20;S.stats.goals=(S.stats.goals||0)+1;g.goal=1}
   if(g.mode==="practice"&&g.asked>=12&&!g.hused&&g.score/g.asked>=.9)S.stats.nh=(S.stats.nh||0)+1;
   if(g.queue&&g.asked&&g.score===g.asked)S.stats.fixed=(S.stats.fixed||0)+1;
-  if(g.mode==="gig"&&g.score>(S.best[bk(S.ch)]||0))S.best[bk(S.ch)]=g.score;
+  if(!g.opt&&g.mode==="gig"&&g.score>(S.best[bk(S.ch)]||0))S.best[bk(S.ch)]=g.score;
+  if(g.opt&&g.opt.daily){if(!S.dly||S.dly.d!==d){S.stats.dailies=(S.stats.dailies||0)+1;S.dly={d:d,s:g.score,a:g.asked};S.coins+=10;g.coins+=10}else if(g.score>S.dly.s){S.dly.s=g.score;S.dly.a=g.asked}}
+  endSeed();
   save();show("end");
   $("endTitle").textContent=g.mode==="gig"?"Encore!":"Nice practice!";
   $("endScore").textContent=g.score+" / "+g.asked;
@@ -232,7 +257,7 @@ function finish(){
   var now=earned().filter(function(n){return was.indexOf(n)<0});$("endBadge").textContent=now.length?"🏅 New badge: "+now.join(", "):"";
   $("endFix").innerHTML=g.log.length?review(g.log):"";
   if(g.goal)$("endSum").textContent+=" 🎯 Daily goal reached: +20 bonus coins!";
-  RETRY=g.log.filter(function(x){return !x.ok}).map(function(x){return x.q});$("retry").classList.toggle("hidden",!RETRY.length);endCoach(g)}
+  RETRY=g.log.filter(function(x){return !x.ok}).map(function(x){return x.q});$("retry").classList.toggle("hidden",!RETRY.length);endCoach(g);if(window.MX&&window.MX.onEnd)window.MX.onEnd(g)}
 function item(x){
   var h="<li class='"+(x.ok?"good":"bad")+"'><div class='rvl'><span class='mk'>"+(x.ok?"✓":"✗")+"</span><b>"+esc(x.t)+" = "+x.a+"</b>";
   if(!x.ok)h+="<span class='you'>You said: "+(x.u===null?"no answer":esc(x.u))+"</span>";
@@ -286,7 +311,9 @@ var BADGES=[
 ["Goal Getter","Reach your daily goal",function(){return (S.stats.goals||0)>=1}],
 ["Hint-Free Hero","Practice 12+ questions, 90%+, no hints",function(){return (S.stats.nh||0)>=1}],
 ["Explorer","Try 6 different challenges",function(){return Object.keys(S.tried||{}).length>=6}],
-["Mistake Fixer","Redo your mistakes with no errors",function(){return (S.stats.fixed||0)>=1}]];
+["Mistake Fixer","Redo your mistakes with no errors",function(){return (S.stats.fixed||0)>=1}],
+["Daily Player","Finish 3 Daily Challenges",function(){return (S.stats.dailies||0)>=3}],
+["Toolbox Pro","Use 5 different math tools",function(){return Object.keys(S.toolsUsed||{}).length>=5}]];
 function earned(){return BADGES.filter(function(b){return b[2]()}).map(function(b){return b[0]})}
 function renderProgress(){
   var st=S.stats,acc=st.asked?Math.round(st.right/st.asked*100)+"%":"–";
@@ -355,10 +382,10 @@ function press(d){
 function restartRun(){
   if($("home")&&!$("home").classList.contains("hidden"))return;
   if(!G)return;
-  var mode=G.mode;
+  var mode=G.mode,op=G.opt;
   clearInterval(timer);
   G=null;
-  start(mode);
+  start(mode,null,op);
 }
 document.addEventListener("keydown",function(e){
   if(e.key==="Enter"&&G&&!$("game").classList.contains("hidden"))e.preventDefault();
@@ -382,10 +409,10 @@ $("snd").onclick=function(){S.snd=S.snd===false;save();$("snd").textContent=S.sn
 applyTheme();$("snd").textContent=S.snd===false?"🔇":"🔊";
 $("gig").onclick=function(){start("gig")};
 $("practice").onclick=function(){start("practice")};
-$("quit").onclick=function(){clearInterval(timer);unlockScreen();G=null;renderHome();show("home")};
+$("quit").onclick=function(){clearInterval(timer);unlockScreen();endSeed();G=null;renderHome();show("home")};
 
 $("restart").onclick=function(){restartRun()};
-$("again").onclick=function(){start(G.mode)};
+$("again").onclick=function(){start(G.mode,null,G.opt)};
 $("home2").onclick=function(){G=null;renderHome();show("home")};
 
 function updatePace(){
@@ -429,6 +456,7 @@ if(window.ResizeObserver)new ResizeObserver(fitBar).observe($("playbar"));
 window.addEventListener("resize",fitBar);
 $("max").addEventListener("focus",function(){document.body.classList.add("typing")});
 $("max").addEventListener("blur",function(){document.body.classList.remove("typing")});
+window.MX={S:S,save:save,gen:gen,start:start,renderHome:renderHome,CH:CH,LENS:LENS,rng:rng,esc:esc,day:day,beep:beep,buzz:buzz,getG:function(){return G},onEnd:null};
 renderHome();
 if(S.seen)$("how").removeAttribute("open");
 })();

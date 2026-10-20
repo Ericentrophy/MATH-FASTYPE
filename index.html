@@ -10,6 +10,9 @@
 <title>Mathescent – Number Challenges for Students</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
 <link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
 </head>
 <body>
 <div class="bg" aria-hidden="true"><span class="g" style="--x:6%;--s:3.2rem;--d:26s;--dl:-4s">+</span><span class="" style="--x:14%;--s:4.4rem;--d:32s;--dl:-18s">×</span><span class="" style="--x:22%;--s:2.8rem;--d:24s;--dl:-9s">7</span><span class="b" style="--x:31%;--s:3.6rem;--d:30s;--dl:-22s">÷</span><span class="" style="--x:39%;--s:3rem;--d:28s;--dl:-2s">=</span><span class="g" style="--x:47%;--s:3.4rem;--d:34s;--dl:-14s">12</span><span class="" style="--x:55%;--s:4rem;--d:25s;--dl:-11s">−</span><span class="" style="--x:63%;--s:2.6rem;--d:29s;--dl:-25s">9</span><span class="b" style="--x:71%;--s:3.8rem;--d:31s;--dl:-7s">π</span><span class="g" style="--x:78%;--s:3rem;--d:27s;--dl:-16s">×</span><span class="" style="--x:86%;--s:3.4rem;--d:33s;--dl:-20s">√</span><span class="" style="--x:93%;--s:2.8rem;--d:26s;--dl:-12s">%</span><span class="b" style="--x:10%;--s:2.4rem;--d:36s;--dl:-30s">3</span><span class="g" style="--x:58%;--s:2.6rem;--d:35s;--dl:-27s">÷</span></div>
@@ -34,6 +37,8 @@
         <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer, lets you choose 12, 30, 50 or unlimited questions, and a coach gives hints and explains mistakes.</li>
         <li><b>Hints (Practice only):</b> tap 💡 up to 3 times. Hint 1 is a nudge, hint 2 is a closer clue, hint 3 shows the full steps. On a computer press <b>H</b>. Blitz has no hints, so practise first.</li>
         <li>After every round you see which answers were right or wrong, why, and your <b>pace</b> (speed vs target).</li>
+        <li><b>Campus challenges:</b> the <b>Daily Challenge</b> gives everyone the same questions today. A <b>challenge code</b> lets friends or a whole class play identical questions, then compare scores.</li>
+        <li><b>Math toolbox:</b> calculator, fraction helper, percent helper, unit converter, equation solver, formula sheet, study timer and a <b>printable worksheet maker</b> for teachers and tutors.</li>
         <li><b>Speedrun restart:</b> press <b>R</b> or <b>Ctrl+R</b> on a computer, or tap the <b>↻ Restart</b> button on a phone to instantly restart the same challenge. Works during a run and on the results screen.</li>
       </ol>
     </details>
@@ -65,6 +70,22 @@
     <p class="tip" id="learnTip"></p>
     <div class="tlist" id="learnList"></div>
     <details class="more"><summary>Show the full 12 × 12 chart (click to open)</summary><div class="grid chart" id="learnChart"></div></details>
+
+    <h2>Campus challenges</h2>
+    <p class="hint">Everyone who plays the same challenge gets exactly the same questions, so you can compare scores fairly with friends and classmates.</p>
+    <div class="panel campus" id="campus">
+      <button class="mode" id="dailyBtn"><b>Daily Challenge</b><span id="dailySub">Same 60-second mixed round for everyone today</span></button>
+      <div class="coderow">
+        <input id="codeIn" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter a code, like mix-12-60-48213" aria-label="Challenge code">
+        <button class="quit" id="codePlay">Play code</button>
+        <button class="quit" id="codeMake">Make a code</button>
+      </div>
+      <p class="hint" id="codeMsg">“Make a code” uses the challenge, tables and Blitz length you picked above.</p>
+    </div>
+
+    <h2>Math toolbox</h2>
+    <p class="hint">Handy tools for homework and revision. Nothing here earns coins, so it is fine to use them any time.</p>
+    <div class="tools" id="tools"></div>
 
     <h2>Your progress</h2>
     <div class="dash">
@@ -125,6 +146,7 @@
   <div class="score big" id="endScore"></div>
   <p class="sum" id="endSum"></p>
   <p class="sum newbadge" id="endBadge"></p>
+  <div class="share" id="endExtra"></div>
 
   <div class="results-panel" id="resultsPanel">
     <h3>Round results</h3>
@@ -142,6 +164,16 @@
 </section>
 </main>
 
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card wide" id="modalCard" tabindex="-1">
+    <div class="modal-hd"><h2 id="modalTitle"></h2><button class="quit" id="modalX" aria-label="Close">✕</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+<div id="printArea" aria-hidden="true"></div>
+
 <script src="script.js"></script>
+<script src="extras.js"></script>
 </body>
 </html>
