@@ -282,6 +282,48 @@ function press(d){
   var b=document.createElement("button");b.textContent=d==="back"?"⌫":(d==="go"?"Go":d);
   b.setAttribute("aria-label",d==="back"?"Delete":(d==="go"?"Submit":d));
   b.onclick=function(){press(d)};$("pad").appendChild(b)});
+(function(){
+  var kb=$("kb"),keys={};
+  var P={"`":"Backquote","-":"Minus","=":"Equal","[":"BracketLeft","]":"BracketRight","\\":"Backslash",";":"Semicolon","'":"Quote",",":"Comma",".":"Period","/":"Slash"};
+  function code(l){if(l>="0"&&l<="9")return"Digit"+l;if(/^[a-z]$/.test(l))return"Key"+l.toUpperCase();return P[l]}
+  function mk(parent,label,id,cls,act){
+    var el=document.createElement("div");el.className="k "+(cls||"");el.textContent=label;
+    if(act){el.classList.add("on");el.onclick=act.fn;if(act.c)el.classList.add(act.c)}
+    if(id)(keys[id]=keys[id]||[]).push(el);parent.appendChild(el);return el}
+  var NUM=function(d){return{c:"num",fn:function(){press(d)}}};
+  var DEL={c:"del",fn:function(){press("back")}},GO={c:"go",fn:function(){press("go")}};
+  var main=document.createElement("div");main.className="kbmain";
+  var rows=[
+    ["`","1","2","3","4","5","6","7","8","9","0","-","=",["⌫","Backspace","w2",DEL]],
+    [["Tab","Tab","w15"],"q","w","e","r","t","y","u","i","o","p","[","]",["\\","Backslash","w15"]],
+    [["Caps","CapsLock","w2"],"a","s","d","f","g","h","j","k","l",";","'",["Go","Enter","w25",GO]],
+    [["Shift","ShiftLeft","w25"],"z","x","c","v","b","n","m",",",".","/",["Shift","ShiftRight","w25"]],
+    [["","Space","w6"]]
+  ];
+  rows.forEach(function(r){
+    var row=document.createElement("div");row.className="kr";
+    r.forEach(function(k){
+      if(typeof k==="string"){
+        var act=null;
+        if(k>="0"&&k<="9")act=NUM(k);
+        else if(k==="h")act={fn:function(){hintClick()}};
+        mk(row,k.toUpperCase(),code(k),"",act)}
+      else mk(row,k[0],k[1],k[2],k[3])});
+    main.appendChild(row)});
+  var np=document.createElement("div");np.className="kbnum";
+  [["Num","NumLock"],["/","NumpadDivide"],["*","NumpadMultiply"],["-","NumpadSubtract"],
+   ["7","Numpad7",0,NUM("7")],["8","Numpad8",0,NUM("8")],["9","Numpad9",0,NUM("9")],["+","NumpadAdd","s2r"],
+   ["4","Numpad4",0,NUM("4")],["5","Numpad5",0,NUM("5")],["6","Numpad6",0,NUM("6")],
+   ["1","Numpad1",0,NUM("1")],["2","Numpad2",0,NUM("2")],["3","Numpad3",0,NUM("3")],["Go","NumpadEnter","s2r",GO],
+   ["0","Numpad0","s2c",NUM("0")],[".","NumpadDecimal"]
+  ].forEach(function(k){mk(np,k[0],k[1],k[2],k[3])});
+  var wrap=document.createElement("div");wrap.className="kbwrap";
+  wrap.appendChild(main);wrap.appendChild(np);kb.appendChild(wrap);
+  function set(e,on){var l=keys[e.code];if(l)l.forEach(function(x){x.classList.toggle("down",on)})}
+  document.addEventListener("keydown",function(e){set(e,true)});
+  document.addEventListener("keyup",function(e){set(e,false)});
+  window.addEventListener("blur",function(){for(var k in keys)keys[k].forEach(function(x){x.classList.remove("down")})});
+})();
 document.addEventListener("keydown",function(e){
   if(e.key==="Enter"&&G&&!$("game").classList.contains("hidden"))e.preventDefault();
   if((e.key==="h"||e.key==="H")&&G&&!$("game").classList.contains("hidden")){hintClick();return}
