@@ -5,7 +5,7 @@
 html,body{margin:0;min-height:100%}
 body{background:var(--bg);color:var(--ink);font:600 17px/1.5 Nunito,system-ui,sans-serif}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:var(--bg);z-index:10}
-main{max-width:680px;margin:0 auto;padding:24px 16px 170px}
+main{max-width:680px;margin:0 auto;padding:24px 16px 240px}
 h1,h2,.big,.chip,.card b,.mode b,.stat b,.ans,.pad button{font-family:Bungee,Impact,"Arial Black",sans-serif;font-weight:400}
 h1,h2,.big{margin:0;line-height:1}
 .hidden{display:none!important}
@@ -28,11 +28,24 @@ h2{font-size:1.1rem;margin:30px 0 12px}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
 .chip{width:50px;height:50px;border-radius:12px;border:3px solid var(--ink);font-size:1.05rem}
 .chip[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.how{border:3px solid var(--ink);border-radius:12px;padding:10px 16px;margin:18px 0 0}
+.how summary,.more summary{cursor:pointer;font-family:Bungee,Impact,"Arial Black",sans-serif;font-size:1rem}
+.how ol{margin:10px 0 4px;padding-left:22px}
+.how li{margin-bottom:4px}
+.more{margin-top:14px}
+.more summary{font-family:inherit;font-weight:800;font-size:.95rem;list-style:none;border:3px solid var(--ink);border-radius:12px;padding:12px 14px;text-align:center}
+.more summary::-webkit-details-marker{display:none}
+.more .maxrow{margin-top:8px}
 .hint{margin:0 0 12px;color:var(--mid);font-size:.95rem}
 .playbar{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--bg);border-top:4px solid var(--ink);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
 .playbar .in{max-width:680px;margin:0 auto}
 .playbar .now{font-size:.85rem;color:var(--mid);text-align:center;margin-bottom:8px}
 .playbar .now b{color:var(--ink)}
+.lenwrap{display:flex;flex-wrap:wrap;gap:6px 8px;justify-content:center;align-items:center;margin-bottom:10px}
+.lenwrap .lbl{font-size:.85rem;color:var(--mid)}
+.len{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.len button{border:2px solid var(--ink);border-radius:10px;padding:4px 10px;min-height:38px;font-weight:800;font-size:.9rem}
+.len button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .playbar .btns{display:grid;grid-template-columns:2fr 1fr;gap:12px}
 .playbar .mode{padding:10px 12px;min-height:64px;text-align:center;font-size:.8rem;box-shadow:4px 4px 0 var(--mid)}
 .playbar .mode b{font-size:1.45rem;margin:0 0 2px}

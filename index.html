@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Math Rock – Number Challenges</title>
+<title>Mathama – Number Challenges</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
 <link rel="stylesheet" href="style.css">
 </head>
@@ -11,21 +11,36 @@
 <main>
 <section id="home">
   <header>
-    <h1>Math<br>Rock</h1>
+    <h1>Mathama</h1>
     <div class="stat"><span>Coins</span><b id="coins">0</b></div>
   </header>
+  <details class="how" id="how" open>
+    <summary>How to play</summary>
+    <ol>
+      <li>Choose a challenge below.</li>
+      <li>At the bottom, pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
+      <li>Type each answer. It checks itself, so you don’t need to press Enter.</li>
+      <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer.</li>
+    </ol>
+  </details>
   <div class="rank"><b id="rankName" class="big" style="font-size:1.2rem"></b><span id="rankNext" style="color:var(--mid)"></span></div>
   <div class="bar"><i id="rankBar"></i></div>
+
+  <div id="tablesBox">
+    <h2>Pick your tables</h2>
+    <p class="hint">A “times table” is the list for one number. The 5 table is 5 × 1, 5 × 2, 5 × 3 and so on. Tap a level to start, or choose your own numbers.</p>
+    <div class="cards" id="levels"></div>
+    <details class="more" id="more">
+    <summary>Custom: pick your own numbers (tap to open)</summary>
+    <div class="maxrow"><label for="max">Highest number</label><input id="max" type="number" min="2" max="50" inputmode="numeric"><button class="chip" id="all" aria-label="Select all tables">All</button></div>
+    <div class="chips" id="chips"></div>
+    </details>
+  </div>
 
   <h2>Choose a challenge</h2>
   <p class="hint">Tap a challenge, then press Play at the bottom of the screen.</p>
   <div class="cards" id="cards"></div>
 
-  <div id="tablesBox">
-    <h2>Pick your tables</h2>
-    <div class="maxrow"><label for="max">Go up to</label><input id="max" type="number" min="2" max="50" inputmode="numeric"><button class="chip" id="all" aria-label="Select all tables">All</button></div>
-    <div class="chips" id="chips"></div>
-  </div>
 
   <h2>Times tables set list (2 to 12)</h2>
   <div class="grid" id="grid"></div>
@@ -34,8 +49,9 @@
   <div class="playbar">
     <div class="in">
       <div class="now">Ready: <b id="playName"></b><span class="desk"> · Press Enter to play</span></div>
+      <div class="lenwrap"><span class="lbl">Blitz length:</span><div class="len" id="len"></div></div>
       <div class="btns">
-        <button class="mode" id="gig"><b>Play Gig</b>60 seconds, earn coins</button>
+        <button class="mode" id="gig"><b>Play Blitz</b><span id="gigSub">60 seconds, earn coins</span></button>
         <button class="mode alt" id="practice"><b>Practice</b>No timer</button>
       </div>
     </div>
