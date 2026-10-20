@@ -11,7 +11,7 @@ var CH=[
 {id:"pct",n:"Percentages",d:"25% of 80",lim:6},
 {id:"dbl",n:"Doubles and halves",d:"Double 37",lim:4},
 {id:"mix",n:"Mixed mayhem",d:"Everything at once",lim:6,tab:1}];
-var S={coins:0,sel:[2,5,10],ch:"times",facts:{},best:{}};
+var S={coins:0,sel:[2,5,10],max:12,ch:"times",facts:{},best:{}};
 try{var raw=localStorage.getItem("mathRock");if(raw){var p=JSON.parse(raw);if(p&&typeof p==="object")S=Object.assign(S,p)}}catch(e){}
 function save(){try{localStorage.setItem("mathRock",JSON.stringify(S))}catch(e){}}
 var $=function(id){return document.getElementById(id)};
@@ -23,13 +23,13 @@ function xk(a,b){return "x"+Math.min(a,b)+"x"+Math.max(a,b)}
 function gen(id){
   var a,b,n,m;
   if(id==="mix"){var o=CH.filter(function(c){return c.id!=="mix"});return gen(o[r(0,o.length-1)].id)}
-  if(id==="times"){a=tb();b=r(2,12);if(Math.random()<.5){n=a;a=b;b=n}return{t:a+" × "+b,a:a*b,k:xk(a,b)}}
-  if(id==="div"){a=tb();b=r(2,12);return{t:(a*b)+" ÷ "+a,a:b,k:"d"+a+"x"+b}}
-  if(id==="miss"){a=tb();b=r(2,12);return Math.random()<.5?{t:"? × "+a+" = "+a*b,a:b,k:xk(a,b)}:{t:a+" × ? = "+a*b,a:b,k:xk(a,b)}}
+  if(id==="times"){a=tb();b=r(2,S.max);if(Math.random()<.5){n=a;a=b;b=n}return{t:a+" × "+b,a:a*b,k:xk(a,b)}}
+  if(id==="div"){a=tb();b=r(2,S.max);return{t:(a*b)+" ÷ "+a,a:b,k:"d"+a+"x"+b}}
+  if(id==="miss"){a=tb();b=r(2,S.max);return Math.random()<.5?{t:"? × "+a+" = "+a*b,a:b,k:xk(a,b)}:{t:a+" × ? = "+a*b,a:b,k:xk(a,b)}}
   if(id==="add"){a=r(6,80);b=r(5,100-a);return{t:a+" + "+b,a:a+b}}
   if(id==="sub"){a=r(20,100);b=r(5,a-5);return{t:a+" − "+b,a:a-b}}
-  if(id==="sq"){n=r(2,15);return{t:n+"²",a:n*n,k:"s"+n}}
-  if(id==="root"){n=r(2,15);return{t:"√"+n*n,a:n,k:"s"+n}}
+  if(id==="sq"){n=r(2,Math.max(15,S.max));return{t:n+"²",a:n*n,k:"s"+n}}
+  if(id==="root"){n=r(2,Math.max(15,S.max));return{t:"√"+n*n,a:n,k:"s"+n}}
   if(id==="pct"){m=[10,20,25,50,75][r(0,4)];b=r(1,10)*20;return{t:m+"% of "+b,a:b*m/100}}
   if(id==="dbl"){n=r(3,50);return Math.random()<.5?{t:"Double "+n,a:n*2}:{t:"Half of "+n*2,a:n}}
 }
@@ -52,9 +52,9 @@ function renderHome(){
     b.setAttribute("aria-pressed",ch.id===S.ch);
     b.innerHTML="<b>"+ch.n+"</b><small>"+ch.d+(S.best[ch.id]?" · Best "+S.best[ch.id]:"")+"</small>";
     b.onclick=function(){S.ch=ch.id;save();renderHome()};c.appendChild(b)});
-  $("tablesBox").classList.toggle("hidden",!cur().tab);
+  $("tablesBox").classList.toggle("hidden",!cur().tab);$("max").value=S.max;
   var ch=$("chips");ch.innerHTML="";
-  for(var n=2;n<=12;n++){(function(n){var b=document.createElement("button");b.className="chip";b.textContent=n;
+  for(var n=2;n<=S.max;n++){(function(n){var b=document.createElement("button");b.className="chip";b.textContent=n;
     b.setAttribute("aria-pressed",S.sel.indexOf(n)>-1);b.setAttribute("aria-label",n+" times table");
     b.onclick=function(){var j=S.sel.indexOf(n);if(j>-1){if(S.sel.length>1)S.sel.splice(j,1)}else S.sel.push(n);save();renderHome()};
     ch.appendChild(b)})(n)}
@@ -88,8 +88,8 @@ function answer(timedOut){
   G.asked++;
   if(q.k){var f=S.facts[q.k]||(S.facts[q.k]={c:0,n:0,t:3000});f.n++;if(ok){f.c++;f.t=Math.round(f.t*.6+Math.min(ms,6000)*.4)}}
   G.lock=true;
-  if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;$("ans").classList.add("ok");setTimeout(after,150)}
-  else{G.wrong[q.t]=q.t+" = "+q.a;$("ans").textContent=q.a;$("ans").classList.add("no");setTimeout(after,G.mode==="gig"?800:1500)}}
+  if(ok){G.score++;if(G.mode==="gig")G.coins+=ms<G.lim*.6?2:1;after()}
+  else{G.wrong[q.t]=q.t+" = "+q.a;$("ans").textContent=q.a;$("ans").classList.add("no");setTimeout(after,G.mode==="gig"?600:1500)}}
 function after(){
   if(!G)return;
   if(G.mode==="practice"&&G.asked>=12)return finish();
@@ -119,6 +119,8 @@ document.addEventListener("keydown",function(e){
   if(e.key>="0"&&e.key<="9")press(e.key);
   else if(e.key==="Backspace")press("back");
   else if(e.key==="Enter")press("go")});
+$("max").onchange=function(){var v=parseInt($("max").value,10);if(isNaN(v))v=12;v=Math.max(2,Math.min(50,v));S.max=v;S.sel=S.sel.filter(function(x){return x<=v});if(!S.sel.length)S.sel=[2];save();renderHome()};
+$("all").onclick=function(){S.sel=[];for(var i=2;i<=S.max;i++)S.sel.push(i);save();renderHome()};
 $("gig").onclick=function(){start("gig")};
 $("practice").onclick=function(){start("practice")};
 $("quit").onclick=function(){clearInterval(timer);G=null;renderHome();show("home")};
