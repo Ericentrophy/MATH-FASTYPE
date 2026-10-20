@@ -52,7 +52,7 @@ function renderHome(){
     b.setAttribute("aria-pressed",ch.id===S.ch);
     b.innerHTML="<b>"+ch.n+"</b><small>"+ch.d+(S.best[ch.id]?" · Best "+S.best[ch.id]:"")+"</small>";
     b.onclick=function(){S.ch=ch.id;save();renderHome()};c.appendChild(b)});
-  $("tablesBox").classList.toggle("hidden",!cur().tab);$("max").value=S.max;
+  $("tablesBox").classList.toggle("hidden",!cur().tab);$("max").value=S.max;$("playName").textContent=cur().n;
   var ch=$("chips");ch.innerHTML="";
   for(var n=2;n<=S.max;n++){(function(n){var b=document.createElement("button");b.className="chip";b.textContent=n;
     b.setAttribute("aria-pressed",S.sel.indexOf(n)>-1);b.setAttribute("aria-label",n+" times table");
@@ -118,7 +118,7 @@ function press(d){
 document.addEventListener("keydown",function(e){
   if(e.key>="0"&&e.key<="9")press(e.key);
   else if(e.key==="Backspace")press("back");
-  else if(e.key==="Enter")press("go")});
+  else if(e.key==="Enter"){if(G&&!$("game").classList.contains("hidden"))press("go");else if(!$("home").classList.contains("hidden")&&document.activeElement===document.body)start("gig")}});
 $("max").onchange=function(){var v=parseInt($("max").value,10);if(isNaN(v))v=12;v=Math.max(2,Math.min(50,v));S.max=v;S.sel=S.sel.filter(function(x){return x<=v});if(!S.sel.length)S.sel=[2];save();renderHome()};
 $("all").onclick=function(){S.sel=[];for(var i=2;i<=S.max;i++)S.sel.push(i);save();renderHome()};
 $("gig").onclick=function(){start("gig")};

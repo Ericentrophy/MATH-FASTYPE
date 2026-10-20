@@ -18,6 +18,7 @@
   <div class="bar"><i id="rankBar"></i></div>
 
   <h2>Choose a challenge</h2>
+  <p class="hint">Tap a challenge, then press Play at the bottom of the screen.</p>
   <div class="cards" id="cards"></div>
 
   <div id="tablesBox">
@@ -26,14 +27,19 @@
     <div class="chips" id="chips"></div>
   </div>
 
-  <div class="modes">
-    <button class="mode" id="gig"><b>Gig</b>60 seconds. Beat the clock on every question. Earn coins.</button>
-    <button class="mode alt" id="practice"><b>Practice</b>12 questions with no timer. Wrong answers are shown.</button>
-  </div>
-
   <h2>Times tables set list (2 to 12)</h2>
   <div class="grid" id="grid"></div>
   <div class="legend"><span>New</span><span class="l">Tricky</span><span class="m">Getting there</span><span class="f">Fast</span></div>
+
+  <div class="playbar">
+    <div class="in">
+      <div class="now">Ready: <b id="playName"></b><span class="desk"> · Press Enter to play</span></div>
+      <div class="btns">
+        <button class="mode" id="gig"><b>Play Gig</b>60 seconds, earn coins</button>
+        <button class="mode alt" id="practice"><b>Practice</b>No timer</button>
+      </div>
+    </div>
+  </div>
 </section>
 
 <section id="game" class="hidden">
