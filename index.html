@@ -25,6 +25,8 @@
   <div class="rank"><b id="rankName" class="big" style="font-size:1.2rem"></b><span id="rankNext" style="color:var(--mid)"></span></div>
   <div class="bar"><i id="rankBar"></i></div>
   <p class="goal" id="goal"></p>
+  <button class="hwban" id="hwBtn" type="button"><span class="hwico" aria-hidden="true">📸</span><span class="hwtx"><b>AI Homework Helper</b><small>Type your homework or snap a photo. Get every step explained.</small></span><span class="hwgo">Try it ▶</span></button>
+  <button class="hwban" id="chatBtn" type="button"><span class="hwico" aria-hidden="true">💬</span><span class="hwtx"><b>Ask the AI</b><small>Ask any math question and keep chatting. Math only.</small></span><span class="hwgo">Chat ▶</span></button>
 
   <div class="layout">
   <div class="col-main">
@@ -44,32 +46,34 @@
     </details>
 
     <div id="gradesBox">
-      <h2>Math grade / level</h2>
-      <p class="hint">Pick Grade 1–6 for elementary, or High School / College for advanced pace. Each level sets tables, challenges, and difficulty. Use Custom for full control.</p>
+      <h2><span class="stepn">1</span> Math grade / level</h2>
+      <p class="hint">Pick Grade 1–6 for elementary, or High School / College for advanced pace. Tap one and the page jumps to step 2. Use Custom for full control.</p>
       <div class="cards" id="grades"></div>
     </div>
 
+    <div id="challengeBox">
+    <h2><span class="stepn">2</span> Choose a challenge</h2>
+    <p class="hint">Tap a challenge and the page jumps to the next step. Challenges depend on your grade.</p>
+    <div class="cards" id="cards"></div>
+    </div>
+
     <div id="tablesBox">
-      <h2>Pick your tables</h2>
-      <p class="hint">A “times table” is the list for one number. The 5 table is 5 × 1, 5 × 2, 5 × 3 and so on. Choose a level, or pick your own numbers.</p>
+      <h2><span class="stepn">3</span> Pick your tables</h2>
+      <p class="hint">A “times table” is the list for one number. The 5 table is 5 × 1, 5 × 2, 5 × 3 and so on. Choose a level, or pick your own numbers. Then press <b>Play</b>.</p>
       <div class="cards" id="levels"></div>
       <details class="more" id="more">
-      <summary>Custom: pick your own numbers (click to open)</summary>
+      <summary>Custom: pick your own numbers</summary>
       <div class="maxrow"><label for="max">Highest number</label><input id="max" type="number" min="2" max="50" inputmode="numeric"><button class="chip" id="all" aria-label="Select all tables">All</button></div>
       <div class="chips" id="chips"></div>
       </details>
     </div>
-
-    <h2>Choose a challenge</h2>
-    <p class="hint">Pick a challenge, then press Play. Challenges available depend on your grade.</p>
-    <div class="cards" id="cards"></div>
 
     <h2>Learn the times tables</h2>
     <p class="hint">Pick a number to see its whole table. Read it out loud, then cover it up and try to say it from memory.</p>
     <div class="chips" id="learnChips"></div>
     <p class="tip" id="learnTip"></p>
     <div class="tlist" id="learnList"></div>
-    <details class="more"><summary>Show the full 12 × 12 chart (click to open)</summary><div class="grid chart" id="learnChart"></div></details>
+    <details class="more"><summary>Show the full 12 × 12 chart</summary><div class="grid chart" id="learnChart"></div></details>
 
     <h2>Campus challenges</h2>
     <p class="hint">Everyone who plays the same challenge gets exactly the same questions, so you can compare scores fairly with friends and classmates.</p>
@@ -175,5 +179,6 @@
 
 <script src="script.js"></script>
 <script src="extras.js"></script>
+<script src="homework.js"></script>
 </body>
 </html>

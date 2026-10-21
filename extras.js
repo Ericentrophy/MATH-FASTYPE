@@ -292,6 +292,8 @@ init:function(){
   document.addEventListener("keydown",function(e){if(e.key==="Escape"&&current)closeTool()});
 })();
 
+M.openTool=openTool;M.toast=toast;M.copy=copy;
+
 /* ---------- campus challenges (daily + codes) ---------- */
 function dailyOpt(){var d=M.day();return{ch:"mix",sel:M.rng(2,12),max:12,len:60,seed:(d*2654435761)>>>0,daily:true,code:"daily",label:"Daily"}}
 function parseCode(s){

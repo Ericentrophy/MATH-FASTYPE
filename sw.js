@@ -1,7 +1,7 @@
 /* Mathescent service worker: network first so updates show up right away,
    with a cached copy as a fallback so the site still opens offline. */
-var CACHE="mathescent-v1";
-var FILES=["./","index.html","style.css","script.js","extras.js","manifest.webmanifest","icon.svg"];
+var CACHE="mathescent-v2";
+var FILES=["./","index.html","style.css","script.js","extras.js","homework.js","manifest.webmanifest","icon.svg"];
 self.addEventListener("install",function(e){
   e.waitUntil(caches.open(CACHE).then(function(c){return c.addAll(FILES)}).then(function(){return self.skipWaiting()}))});
 self.addEventListener("activate",function(e){

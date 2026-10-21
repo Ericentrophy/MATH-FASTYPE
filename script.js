@@ -153,6 +153,17 @@ function lenName(){for(var i=0;i<LENS.length;i++)if(LENS[i][0]===S.len)return LE
 function fmt(s){return s>=60?Math.floor(s/60)+":"+("0"+s%60).slice(-2):s+"s"}
 function bk(id){return S.len===60?id:id+"@"+S.len}
 function lvName(){for(var i=0;i<LV.length;i++){if(S.max===LV[i].max&&JSON.stringify(S.sel.slice().sort(function(x,y){return x-y}))===JSON.stringify(LV[i].sel))return LV[i].n}return "Custom"}
+function goTo(id){
+  var el=$(id);if(!el)return;
+  var rm=window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches;
+  requestAnimationFrame(function(){
+    el.scrollIntoView({behavior:rm?"auto":"smooth",block:"start"});
+    el.classList.remove("flash");void el.offsetWidth;el.classList.add("flash");
+    setTimeout(function(){el.classList.remove("flash")},1900)})}
+function pulsePlay(){
+  var b=$("gig");if(!b)return;
+  b.classList.remove("pulse");void b.offsetWidth;b.classList.add("pulse");
+  setTimeout(function(){b.classList.remove("pulse")},2600)}
 function renderHome(){
   $("coins").textContent=S.coins;$("dstreak").textContent=S.last>=day()-1?S.ds||0:0;
   var tn=S.td&&S.td.d===day()?S.td.n:0;$("goal").textContent=tn>=GOAL?"🎯 Daily goal done! "+tn+" correct today":"🎯 Daily goal: "+tn+"/"+GOAL+" correct answers today (+20 coins)";
@@ -165,7 +176,7 @@ function renderHome(){
   GRADES.forEach(function(g){var b=document.createElement("button");b.className="card";
     b.setAttribute("aria-pressed",g.id===S.grade);
     b.innerHTML="<b>"+g.n+"</b><small>"+g.d+"</small>";
-    b.onclick=function(){S.grade=g.id;if(g.sel){S.sel=g.sel.slice();S.max=g.max;}if(g.chs&&g.chs.indexOf(S.ch)<0)S.ch=g.chs[0];save();renderHome()};
+    b.onclick=function(){S.grade=g.id;if(g.sel){S.sel=g.sel.slice();S.max=g.max;}if(g.chs&&g.chs.indexOf(S.ch)<0)S.ch=g.chs[0];save();renderHome();goTo("challengeBox")};
     gr.appendChild(b)});}
   var allowed=null;for(var gi=0;gi<GRADES.length;gi++)if(GRADES[gi].id===S.grade)allowed=GRADES[gi].chs;
   var c=$("cards");c.innerHTML="";
@@ -173,7 +184,7 @@ function renderHome(){
     var b=document.createElement("button");b.className="card";
     b.setAttribute("aria-pressed",ch.id===S.ch);
     b.innerHTML="<b>"+ch.n+"</b><small>"+ch.d+(S.best[bk(ch.id)]?" · Best "+S.best[bk(ch.id)]:"")+"</small>";
-    b.onclick=function(){S.ch=ch.id;save();renderHome()};c.appendChild(b)});
+    b.onclick=function(){S.ch=ch.id;save();renderHome();if(cur().tab)goTo("tablesBox");else pulsePlay()};c.appendChild(b)});
   $("tablesBox").classList.toggle("hidden",!cur().tab);$("max").value=S.max;$("playName").textContent=cur().n+(cur().tab?" · "+lvName():"");
   var ln=$("len");ln.innerHTML="";
   LENS.forEach(function(l){var b=document.createElement("button");b.textContent=l[1];b.setAttribute("aria-pressed",S.len===l[0]);b.setAttribute("aria-label","Blitz length "+l[2]);
@@ -187,7 +198,7 @@ function renderHome(){
   LV.forEach(function(l){var b=document.createElement("button");b.className="card";
     var on=S.max===l.max&&JSON.stringify(S.sel.slice().sort(function(x,y){return x-y}))===JSON.stringify(l.sel);
     b.setAttribute("aria-pressed",on);b.innerHTML="<b>"+l.n+"</b><small>"+l.d+"</small>";
-    b.onclick=function(){S.sel=l.sel.slice();S.max=l.max;save();renderHome()};lv.appendChild(b)});
+    b.onclick=function(){S.sel=l.sel.slice();S.max=l.max;save();renderHome();pulsePlay()};lv.appendChild(b)});
   var ch=$("chips");ch.innerHTML="";
   for(var n=2;n<=S.max;n++){(function(n){var b=document.createElement("button");b.className="chip";b.textContent=n;
     b.setAttribute("aria-pressed",S.sel.indexOf(n)>-1);b.setAttribute("aria-label",n+" times table");
@@ -451,7 +462,8 @@ function renderEndResults(g){
 
 
 
-$("optBtn").onclick=function(){var pb=$("playbar"),o=pb.classList.toggle("open");this.setAttribute("aria-expanded",o);fitBar()};
+$("optBtn").onclick=function(){var pb=$("playbar"),o=pb.classList.toggle("open");this.setAttribute("aria-expanded",o);this.classList.remove("fresh");if(!S.optSeen){S.optSeen=1;save()}fitBar()};
+if(!S.optSeen)$("optBtn").classList.add("fresh");
 if(window.ResizeObserver)new ResizeObserver(fitBar).observe($("playbar"));
 window.addEventListener("resize",fitBar);
 $("max").addEventListener("focus",function(){document.body.classList.add("typing")});
