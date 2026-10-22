@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" id="tc" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Mathescent">
+<title>Mathescent – Number Challenges for Students</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@600;800&display=swap">
+<link rel="stylesheet" href="style.css">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon.svg">
+</head>
+<body>
+<div class="bg" aria-hidden="true"><span class="g" style="--x:6%;--s:3.2rem;--d:26s;--dl:-4s">+</span><span class="" style="--x:14%;--s:4.4rem;--d:32s;--dl:-18s">×</span><span class="" style="--x:22%;--s:2.8rem;--d:24s;--dl:-9s">7</span><span class="b" style="--x:31%;--s:3.6rem;--d:30s;--dl:-22s">÷</span><span class="" style="--x:39%;--s:3rem;--d:28s;--dl:-2s">=</span><span class="g" style="--x:47%;--s:3.4rem;--d:34s;--dl:-14s">12</span><span class="" style="--x:55%;--s:4rem;--d:25s;--dl:-11s">−</span><span class="" style="--x:63%;--s:2.6rem;--d:29s;--dl:-25s">9</span><span class="b" style="--x:71%;--s:3.8rem;--d:31s;--dl:-7s">π</span><span class="g" style="--x:78%;--s:3rem;--d:27s;--dl:-16s">×</span><span class="" style="--x:86%;--s:3.4rem;--d:33s;--dl:-20s">√</span><span class="" style="--x:93%;--s:2.8rem;--d:26s;--dl:-12s">%</span><span class="b" style="--x:10%;--s:2.4rem;--d:36s;--dl:-30s">3</span><span class="g" style="--x:58%;--s:2.6rem;--d:35s;--dl:-27s">÷</span></div>
+<main>
+<section id="home">
+  <header>
+    <div><h1>Mathescent</h1><p class="tag">Train your brain, beat the clock, climb the ranks. Built for students.</p></div>
+    <div class="statrow"><button class="quit" id="snd" aria-label="Sound on or off">🔊</button><button class="quit" id="theme" aria-label="Switch light or dark">🌓</button><div class="stat"><span>Coins</span><b id="coins">0</b></div><div class="stat"><span>Day streak</span><b id="dstreak">0</b></div></div>
+  </header>
+  <div class="rank"><b id="rankName" class="big" style="font-size:1.2rem"></b><span id="rankNext" style="color:var(--mid)"></span></div>
+  <div class="bar"><i id="rankBar"></i></div>
+  <p class="goal" id="goal"></p>
+  <button class="hwban" id="hwBtn" type="button"><span class="hwico" aria-hidden="true">📸</span><span class="hwtx"><b>AI Homework Helper</b><small>Type your homework or snap a photo. Get every step explained.</small></span><span class="hwgo">Try it ▶</span></button>
+  <button class="hwban" id="chatBtn" type="button"><span class="hwico" aria-hidden="true">💬</span><span class="hwtx"><b>Ask the AI</b><small>Ask any math question and keep chatting. Math only.</small></span><span class="hwgo">Chat ▶</span></button>
+
+  <div class="layout">
+  <div class="col-main">
+    <details class="how" id="how" open>
+      <summary>How to play</summary>
+      <ol>
+        <li>Choose your <b>grade</b> (Grade 1–6, High School, or College) and a challenge below.</li>
+        <li>Pick how long to play (30 seconds up to 3 minutes), then press <b>Play Blitz</b>.</li>
+        <li>Type each answer on your keyboard, or <b>tap the number pad</b> on a phone or tablet. It checks itself, so you don’t need to press Enter or Go.</li>
+        <li>Correct answers earn coins that move you up the ranks. <b>Practice</b> has no timer, lets you choose 12, 30, 50 or unlimited questions, and a coach gives hints and explains mistakes.</li>
+        <li><b>Hints (Practice only):</b> tap 💡 up to 3 times. Hint 1 is a nudge, hint 2 is a closer clue, hint 3 shows the full steps. On a computer press <b>H</b>. Blitz has no hints, so practise first.</li>
+        <li>After every round you see which answers were right or wrong, why, and your <b>pace</b> (speed vs target).</li>
+        <li><b>Campus challenges:</b> the <b>Daily Challenge</b> gives everyone the same questions today. A <b>challenge code</b> lets friends or a whole class play identical questions, then compare scores.</li>
+        <li><b>Math toolbox:</b> calculator, fraction helper, percent helper, unit converter, equation solver, formula sheet, study timer and a <b>printable worksheet maker</b> for teachers and tutors.</li>
+        <li><b>Speedrun restart:</b> press <b>R</b> or <b>Ctrl+R</b> on a computer, or tap the <b>↻ Restart</b> button on a phone to instantly restart the same challenge. Works during a run and on the results screen.</li>
+      </ol>
+    </details>
+
+    <div id="gradesBox">
+      <h2><span class="stepn">1</span> Math grade / level</h2>
+      <p class="hint">Pick Grade 1–6 for elementary, or High School / College for advanced pace. Tap one and the page jumps to step 2. Use Custom for full control.</p>
+      <div class="cards" id="grades"></div>
+    </div>
+
+    <div id="challengeBox">
+    <h2><span class="stepn">2</span> Choose a challenge</h2>
+    <p class="hint">Tap a challenge and the page jumps to the next step. Challenges depend on your grade.</p>
+    <div class="cards" id="cards"></div>
+    </div>
+
+    <div id="tablesBox">
+      <h2><span class="stepn">3</span> Pick your tables</h2>
+      <p class="hint">A “times table” is the list for one number. The 5 table is 5 × 1, 5 × 2, 5 × 3 and so on. Choose a level, or pick your own numbers. Then press <b>Play</b>.</p>
+      <div class="cards" id="levels"></div>
+      <details class="more" id="more">
+      <summary>Custom: pick your own numbers</summary>
+      <div class="maxrow"><label for="max">Highest number</label><input id="max" type="number" min="2" max="50" inputmode="numeric"><button class="chip" id="all" aria-label="Select all tables">All</button></div>
+      <div class="chips" id="chips"></div>
+      </details>
+    </div>
+
+    <h2>Learn the times tables</h2>
+    <p class="hint">Pick a number to see its whole table. Read it out loud, then cover it up and try to say it from memory.</p>
+    <div class="chips" id="learnChips"></div>
+    <p class="tip" id="learnTip"></p>
+    <div class="tlist" id="learnList"></div>
+    <details class="more"><summary>Show the full 12 × 12 chart</summary><div class="grid chart" id="learnChart"></div></details>
+
+    <h2>Campus challenges</h2>
+    <p class="hint">Everyone who plays the same challenge gets exactly the same questions, so you can compare scores fairly with friends and classmates.</p>
+    <div class="panel campus" id="campus">
+      <button class="mode" id="dailyBtn"><b>Daily Challenge</b><span id="dailySub">Same 60-second mixed round for everyone today</span></button>
+      <div class="coderow">
+        <input id="codeIn" type="text" inputmode="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Enter a code, like mix-12-60-48213" aria-label="Challenge code">
+        <button class="quit" id="codePlay">Play code</button>
+        <button class="quit" id="codeMake">Make a code</button>
+      </div>
+      <p class="hint" id="codeMsg">“Make a code” uses the challenge, tables and Blitz length you picked above.</p>
+    </div>
+
+    <h2>Math toolbox</h2>
+    <p class="hint">Handy tools for homework and revision. Nothing here earns coins, so it is fine to use them any time.</p>
+    <div class="tools" id="tools"></div>
+
+    <h2>Your progress</h2>
+    <div class="dash">
+      <div class="panel"><h3>Stats</h3><div class="stats" id="stats"></div></div>
+      <div class="panel"><h3>Math trick</h3><p id="trick" class="trick"></p><button class="quit" id="trickBtn">Another trick</button></div>
+    </div>
+    <div class="panel"><h3>My tricky facts</h3><ul class="fixes" id="tricky"></ul><button class="quit" id="trainBtn">Train these in Practice</button></div>
+    <div class="panel"><h3>Badges <span id="badgeCount"></span></h3><div class="badges" id="badges"></div></div>
+
+    <h2>Times tables set list (2 to 12)</h2>
+    <div class="grid" id="grid"></div>
+    <div class="legend"><span>New</span><span class="l">Tricky</span><span class="m">Getting there</span><span class="f">Fast</span></div>
+  </div>
+
+  <aside class="col-side">
+    <div class="playbar" id="playbar">
+      <div class="in">
+        <div class="now">Ready: <b id="playName"></b><span class="desk"> · Press Enter to play</span></div>
+        <button class="optbtn" id="optBtn" aria-expanded="false" aria-controls="opts">⚙ Options</button>
+        <div class="opts" id="opts">
+        <div class="lenwrap"><span class="lbl">Blitz length:</span><div class="len" id="len"></div></div>
+        <div class="lenwrap"><span class="lbl">Practice length:</span><div class="len" id="plen"></div></div>
+        <div class="lenwrap"><button class="focus" id="focus" aria-pressed="false">🎯 Smart focus: more of my tricky facts</button></div>
+        </div>
+        <div class="btns">
+          <button class="mode" id="gig"><b>Play Blitz</b><span id="gigSub">60 seconds, earn coins</span></button>
+          <button class="mode alt" id="practice"><b>Practice</b><span id="pracSub">12 questions, with coach</span></button>
+        </div>
+      </div>
+    </div>
+  </aside>
+  </div>
+</section>
+
+<section id="game" class="hidden">
+  <div class="top"><button class="quit" id="quit">Quit</button><button class="quit" id="restart" title="Restart run (R or Ctrl+R)">↻ Restart</button><b id="status"></b><b id="streak" class="streak"></b><button class="quit hidden" id="finishBtn">Finish</button><b id="clock" class="big"></b></div>
+  <div class="bar qbar"><i id="qbar"></i></div>
+  <div class="pace-row" id="paceRow">
+    <span class="pace-label">Pace</span>
+    <div class="pace-bar"><i id="paceBar"></i></div>
+    <span class="pace-val" id="paceVal">—</span>
+  </div>
+  <div class="gamegrid">
+    <div><div class="q big" id="q"></div>
+    <div class="ans" id="ans" aria-live="polite"></div>
+    <div class="coach hidden" id="coachBox">
+      <div class="coachhd">🎓 Coach <small>(built-in helper, not a live AI)</small></div>
+      <p id="coach"></p>
+      <div class="coachbtns"><button class="quit" id="hintBtn">💡 Hint</button><button class="quit hidden" id="nextBtn">Next →</button></div>
+    </div></div>
+    <div class="pad" id="pad"></div>
+  </div>
+  <div class="kb" id="kb" aria-hidden="true"></div>
+</section>
+
+<section id="end" class="hidden">
+  <h2 style="text-align:center;margin-top:30px" id="endTitle"></h2>
+  <div class="score big" id="endScore"></div>
+  <p class="sum" id="endSum"></p>
+  <p class="sum newbadge" id="endBadge"></p>
+  <div class="share" id="endExtra"></div>
+
+  <div class="results-panel" id="resultsPanel">
+    <h3>Round results</h3>
+    <div class="stats results-stats" id="endStats"></div>
+    <div class="pace-summary" id="paceSummary"></div>
+  </div>
+
+  <p class="tip hidden" id="endCoach"></p>
+  <div class="modes">
+    <button class="mode" id="again"><b>Play again</b>Same challenge</button>
+    <button class="mode hidden" id="retry"><b>Fix my mistakes</b>Redo only the ones you missed</button>
+    <button class="mode alt" id="home2"><b>Home</b>Change challenge</button>
+  </div>
+  <div id="endFix"></div>
+</section>
+</main>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-card wide" id="modalCard" tabindex="-1">
+    <div class="modal-hd"><h2 id="modalTitle"></h2><button class="quit" id="modalX" aria-label="Close">✕</button></div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+<div class="toast hidden" id="toast" role="status" aria-live="polite"></div>
+<div id="printArea" aria-hidden="true"></div>
+
+<script src="script.js"></script>
+<script src="extras.js"></script>
+<script src="homework.js"></script>
+</body>
+</html>
