@@ -420,3 +420,13 @@ body.playing{overscroll-behavior-y:none}
 .ch-form .mode{padding:8px 16px;box-shadow:3px 3px 0 var(--mid)}
 .ch-form .mode b{font-size:1rem;margin:0}
 .hwban+.hwban{margin-top:10px}
+/* ---------- fixed number + per-question timer ---------- */
+.fixbox{margin:16px 0 6px}
+.fixhd{font-weight:800;margin:0 0 4px}
+.fixbox .chips{margin-bottom:10px}
+.fixbox .lenwrap{justify-content:flex-start}
+.qtcw{display:inline-flex;align-items:center;gap:6px}
+#qtc{width:72px;height:38px;border:2px solid var(--ink);border-radius:10px;background:var(--bg);color:var(--ink);font:800 .9rem Nunito,system-ui,sans-serif;text-align:center}
+.qleft{font-family:Bungee,Impact,"Arial Black",sans-serif;font-weight:400;font-size:1.05rem;min-width:2.8em;text-align:center;padding:2px 8px;border:3px solid var(--ink);border-radius:10px}
+.qleft:empty{display:none}
+.qleft.low{background:var(--ink);color:var(--bg)}

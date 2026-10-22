@@ -41,6 +41,7 @@
         <li>After every round you see which answers were right or wrong, why, and your <b>pace</b> (speed vs target).</li>
         <li><b>Campus challenges:</b> the <b>Daily Challenge</b> gives everyone the same questions today. A <b>challenge code</b> lets friends or a whole class play identical questions, then compare scores.</li>
         <li><b>Math toolbox:</b> calculator, fraction helper, percent helper, unit converter, equation solver, formula sheet, study timer and a <b>printable worksheet maker</b> for teachers and tutors.</li>
+        <li><b>Fixed number and question timer:</b> for tables challenges you can keep one number fixed on the left (like <b>4 × ?</b>). Open <b>⚙ Options</b> to set the time per question: 3s, 5s, 10s, your own number of seconds, or <b>No timer</b>. When time runs out the question counts as missed and the answer is shown.</li>
         <li><b>Speedrun restart:</b> press <b>R</b> or <b>Ctrl+R</b> on a computer, or tap the <b>↻ Restart</b> button on a phone to instantly restart the same challenge. Works during a run and on the results screen.</li>
       </ol>
     </details>
@@ -61,6 +62,12 @@
       <h2><span class="stepn">3</span> Pick your tables</h2>
       <p class="hint">A “times table” is the list for one number. The 5 table is 5 × 1, 5 × 2, 5 × 3 and so on. Choose a level, or pick your own numbers. Then press <b>Play</b>.</p>
       <div class="cards" id="levels"></div>
+      <div class="fixbox" id="fixBox">
+        <p class="fixhd">Fixed number (optional)</p>
+        <p class="hint">Pick one number to keep on the <b>left</b> of every question, like <b>4 × ?</b>, while the number on the right changes. In Division the fixed number is what you divide by. Choose <b>Off</b> for a mix of tables. The Daily Challenge and challenge codes ignore this so everyone gets the same questions.</p>
+        <div class="chips" id="fixChips"></div>
+        <div class="lenwrap hidden" id="ordWrap"><span class="lbl">Right-hand number:</span><div class="len" id="ordBtns"></div></div>
+      </div>
       <details class="more" id="more">
       <summary>Custom: pick your own numbers</summary>
       <div class="maxrow"><label for="max">Highest number</label><input id="max" type="number" min="2" max="50" inputmode="numeric"><button class="chip" id="all" aria-label="Select all tables">All</button></div>
@@ -112,6 +119,8 @@
         <div class="opts" id="opts">
         <div class="lenwrap"><span class="lbl">Blitz length:</span><div class="len" id="len"></div></div>
         <div class="lenwrap"><span class="lbl">Practice length:</span><div class="len" id="plen"></div></div>
+        <div class="lenwrap"><span class="lbl">Time per question:</span><div class="len" id="qt"></div><label class="qtcw"><span class="lbl">Custom</span><input id="qtc" type="number" min="1" max="120" step="1" inputmode="numeric" placeholder="sec" aria-label="Custom seconds per question"><span class="lbl">sec</span></label></div>
+        <div class="lenwrap"><button class="focus" id="penBtn" aria-pressed="false">⏰ Time-out costs 1 coin (Blitz)</button></div>
         <div class="lenwrap"><button class="focus" id="focus" aria-pressed="false">🎯 Smart focus: more of my tricky facts</button></div>
         </div>
         <div class="btns">
@@ -125,7 +134,7 @@
 </section>
 
 <section id="game" class="hidden">
-  <div class="top"><button class="quit" id="quit">Quit</button><button class="quit" id="restart" title="Restart run (R or Ctrl+R)">↻ Restart</button><b id="status"></b><b id="streak" class="streak"></b><button class="quit hidden" id="finishBtn">Finish</button><b id="clock" class="big"></b></div>
+  <div class="top"><button class="quit" id="quit">Quit</button><button class="quit" id="restart" title="Restart run (R or Ctrl+R)">↻ Restart</button><b id="status"></b><b id="streak" class="streak"></b><button class="quit hidden" id="finishBtn">Finish</button><b id="qleft" class="qleft" title="Time left for this question"></b><b id="clock" class="big"></b></div>
   <div class="bar qbar"><i id="qbar"></i></div>
   <div class="pace-row" id="paceRow">
     <span class="pace-label">Pace</span>

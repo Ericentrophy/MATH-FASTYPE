@@ -8,7 +8,8 @@
    and simple equations like 3x + 5 = 20 on its own, with steps. Photos and
    word problems need the AI connection. */
 (function(){
-var AI_ENDPOINT="";   // e.g. "https://mathescent-ai.yourname.workers.dev"
+var AI_ENDPOINT="https://mathescent.vercel.app/api/solve";
+
 
 var M=window.MX;if(!M||!M.openTool)return;
 var S=M.S,esc=M.esc;
